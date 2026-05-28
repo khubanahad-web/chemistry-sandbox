@@ -1,94 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>FSc Chemistry Learning Portal</title>
-    <style>
-        :root {
-            --navy-gate: #0a1128;
-            --studio-bg: #070b19;
-            --sidebar-bg: #0f1426;
-            --border-color: #24315e;
-            --skin-btn: #eecda3;
-            --text-main: #f0f4f8;
-        }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--studio-bg); color: var(--text-main); font-family: sans-serif; overflow: hidden; }
+<script>
+    // ... (keep all your existing variables and setup) ...
 
-        /* GATEWAY SCREEN */
-        .gateway-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--navy-gate); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .gateway-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 40px; }
-        .gateway-btn-group { display: flex; gap: 25px; }
-        .skin-button { background-color: var(--skin-btn); color: #2c1a04; font-size: 1.15rem; font-weight: 700; padding: 15px 38px; border: none; border-radius: 12px; cursor: pointer; }
-
-        /* PORTAL LAYOUT */
-        .portal-layout { display: none; height: 100%; width: 100%; display: flex; }
-        .fsc-sidebar { width: 350px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); padding: 20px; overflow-y: auto; }
-        .workspace-stage { flex: 1; padding: 25px; position: relative; }
-        canvas { background-color: #050710; border: 1px solid var(--border-color); border-radius: 10px; width: 100%; height: 100%; }
-    </style>
-</head>
-<body>
-
-    <div id="gatewayScreen" class="gateway-screen">
-        <h1 class="gateway-title">FSc Chemistry Learning Portal</h1>
-        <div class="gateway-btn-group">
-            <button class="skin-button" onclick="enterPortal('Part-I')">FSc Part-I</button>
-            <button class="skin-button" onclick="enterPortal('Part-II')">FSc Part-II</button>
-        </div>
-    </div>
-
-    <div id="portalLayout" class="portal-layout">
-        <div class="fsc-sidebar">
-            <h2 id="cohortTitle">FSc Chemistry</h2>
-            <div id="side-info">Select a reaction to begin.</div>
-        </div>
-        <div class="workspace-stage">
-            <canvas id="sandbox"></canvas>
-        </div>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('sandbox');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function enterPortal(cohort) {
-            document.getElementById('gatewayScreen').style.display = 'none';
-            document.getElementById('portalLayout').style.display = 'flex';
-            document.getElementById('cohortTitle').textContent = `FSc ${cohort} Chemistry`;
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            initChamber();
-            animate();
-        }
-
-        class Atom {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 4;
-                this.vy = (Math.random() - 0.5) * 4;
+    function drawEnergyEffect(p1, p2, type) {
+        ctx.beginPath();
+        if (type === "Exothermic") {
+            // White/Yellow Sparks
+            ctx.strokeStyle = "#ffeb3b";
+            for(let i=0; i<8; i++) {
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p1.x + Math.cos(i)*40, p1.y + Math.sin(i)*40);
             }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath(); ctx.arc(this.x, this.y, 15, 0, Math.PI*2);
-                ctx.fillStyle = "#ff65a3"; ctx.fill();
+            ctx.stroke();
+        } else {
+            // Endothermic Red Aura/Blurry Lines
+            ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(p1.x, p1.y, p1.radius + 10, 0, Math.PI*2);
+            ctx.stroke();
+        }
+    }
+
+    // Inside renderLoop, add collision detection:
+    function checkCollisions() {
+        for(let i=0; i<particles.length; i++) {
+            for(let j=i+1; j<particles.length; j++) {
+                let p1 = particles[i]; let p2 = particles[j];
+                let dx = p1.x - p2.x; let dy = p1.y - p2.y;
+                if(Math.sqrt(dx*dx + dy*dy) < p1.radius + p2.radius) {
+                    // Trigger visual based on temp
+                    if(Math.abs(temperature - activeRxn.temp) < 50) {
+                        drawEnergyEffect(p1, p2, activeRxn.type || "Exothermic");
+                    }
+                }
             }
         }
+    }
 
-        function initChamber() {
-            for(let i=0; i<15; i++) particles.push(new Atom());
-        }
-
-        function animate() {
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
-        }
-    </script>
-</body>
-</html>
+    // Update your renderLoop:
+    function renderLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        checkCollisions(); // Added visual logic
+        requestAnimationFrame(renderLoop);
+    }
+</script>
