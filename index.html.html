@@ -2,104 +2,99 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FSc Chemistry Studio</title>
+    <title>FSc Chemistry Studio - Master Version</title>
     <style>
         :root {
             --navy-gate: #0a1128; --studio-bg: #070b19; --card-bg: #131a33;
             --fsc-green: #00e676; --fsc-blue: #29b6f6; --fsc-orange: #ff9100;
         }
-        body { margin:0; background: var(--studio-bg); color: #fff; font-family: sans-serif; overflow: hidden; }
-        .gateway-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--navy-gate); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100; }
-        .skin-button { background: #eecda3; color: #2c1a04; font-weight: 700; padding: 15px 38px; border: none; border-radius: 12px; cursor: pointer; }
-        .portal-layout { display: none; height: 100vh; display: flex; }
-        .fsc-sidebar { width: 350px; background: #0f1426; border-right: 1px solid #24315e; overflow-y:auto; }
-        .workspace-stage { flex: 1; padding: 25px; display: flex; flex-direction: column; }
-        .briefing-popup-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(7,11,25,0.98); z-index:50; display:none; justify-content:center; align-items:center; }
-        .briefing-card { background: var(--card-bg); border: 2px solid #24315e; border-radius: 20px; padding: 30px; max-width: 650px; }
-        canvas { background: #050710; border-radius: 10px; border: 1px solid #24315e; cursor: crosshair; }
+        body { margin:0; background: var(--studio-bg); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        
+        #gateway { position:fixed; width:100%; height:100%; background: var(--navy-gate); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100; }
+        
+        #main-ui { display:none; height:100vh; display:flex; }
+        .sidebar { width: 300px; background: #0f1426; border-right: 1px solid #24315e; padding: 20px; overflow-y:auto; }
+        .workspace { flex:1; display:flex; flex-direction:column; padding:20px; position:relative; }
+        
+        /* Popup Styling */
+        #popup { position:absolute; width:100%; height:100%; background:rgba(7,11,25,0.95); display:flex; justify-content:center; align-items:center; z-index:50; }
+        .card { background: var(--card-bg); padding:40px; border-radius:20px; border:1px solid #24315e; max-width:600px; text-align:center; }
+        
+        #anim-stage { width:100%; height:150px; background:black; margin:20px 0; position:relative; border-radius:10px; }
+        .atom { position:absolute; width:40px; height:40px; border-radius:50%; top:55px; }
+        
+        canvas { background: #050710; border:1px solid #24315e; border-radius:10px; width:100%; }
     </style>
 </head>
 <body>
-    <div id="gatewayScreen" class="gateway-screen">
-        <h1>FSc Chemistry Portal</h1>
-        <button class="skin-button" onclick="enterPortal()">Enter FSc Part-II</button>
-    </div>
 
-    <div id="portalLayout" class="portal-layout" style="display:none;">
-        <div class="fsc-sidebar" id="sidebar"></div>
-        <div class="workspace-stage">
-            <div id="briefingPopup" class="briefing-popup-overlay">
-                <div class="briefing-card" id="briefingContent"></div>
-            </div>
-            <canvas id="sandbox" width="600" height="400"></canvas>
-            <input type="range" id="tempSlider" min="25" max="600" value="25">
+<div id="gateway">
+    <h1>FSc Chemistry Studio</h1>
+    <button onclick="start()" style="padding:15px 30px; font-weight:bold; cursor:pointer;">Enter Lab</button>
+</div>
+
+<div id="main-ui">
+    <div class="sidebar" id="sidebar">
+        <h3 id="side-title">Reaction Details</h3>
+        <div id="side-content">Select a reaction to begin.</div>
+    </div>
+    <div class="workspace">
+        <div id="popup">
+            <div class="card" id="popup-content"></div>
         </div>
+        <canvas id="sandbox" width="800" height="400"></canvas>
     </div>
+</div>
 
-    <script>
-        const reactions = [
-            { title: "Hydrogenation of Ethene", type: "Exothermic", formula: "CH₂=CH₂ + H₂ → CH₃-CH₃", temp: 250, desc: "Releases energy as stable bonds form.", steps: ["Ni catalyst", "Pi-bond breaks", "H atoms attach"] },
-            { title: "Thermal Decomposition of CaCO₃", type: "Endothermic", formula: "CaCO₃ → CaO + CO₂", temp: 500, desc: "Absorbs massive heat to break lattice.", steps: ["Energy intake", "Bond cleavage", "Gas release"] }
-        ];
+<script>
+const rxnData = [
+    { title: "Hydrogenation of Ethene", type: "Exothermic", eq: "CH₂=CH₂ + H₂ → CH₃-CH₃", color: "#00e676", desc: "Releases heat during bond formation." },
+    { title: "Decomposition of CaCO₃", type: "Endothermic", eq: "CaCO₃ → CaO + CO₂", color: "#ff4444", desc: "Absorbs heat to break bonds." }
+];
 
-        let activeRxn = reactions[0];
-        let temperature = 25; let particles = []; let sparks = [];
-        const canvas = document.getElementById('sandbox'); const ctx = canvas.getContext('2d');
+function start() {
+    document.getElementById('gateway').style.display = 'none';
+    document.getElementById('main-ui').style.display = 'flex';
+    loadReaction(0);
+}
 
-        function enterPortal() {
-            document.getElementById('gatewayScreen').style.display = 'none';
-            document.getElementById('portalLayout').style.display = 'flex';
-            triggerBriefing(0);
-        }
+function loadReaction(idx) {
+    const rxn = rxnData[idx];
+    document.getElementById('popup').style.display = 'flex';
+    document.getElementById('popup-content').innerHTML = `
+        <h2>${rxn.title}</h2>
+        <p style="font-size:1.5rem; color:var(--fsc-blue)">${rxn.eq}</p>
+        <div id="anim-stage">
+            <div id="atom1" class="atom" style="left:50px; background:pink;"></div>
+            <div id="atom2" class="atom" style="right:50px; background:cyan;"></div>
+        </div>
+        <p>${rxn.desc} (${rxn.type})</p>
+        <button onclick="enterSim(${idx})" style="padding:10px 20px; cursor:pointer;">Understood, Enter Simulation</button>
+    `;
+}
 
-        function triggerBriefing(idx) {
-            activeRxn = reactions[idx];
-            document.getElementById('briefingContent').innerHTML = `
-                <h2>${activeRxn.title} (${activeRxn.type})</h2>
-                <p><strong>Equation:</strong> ${activeRxn.formula}</p>
-                <div id="steps"></div>
-                <button class="skin-button" onclick="document.getElementById('briefingPopup').style.display='none'; initChamber();">Start</button>
-            `;
-            document.getElementById('briefingPopup').style.display = 'flex';
-        }
+function enterSim(idx) {
+    document.getElementById('popup').style.display = 'none';
+    const rxn = rxnData[idx];
+    document.getElementById('side-content').innerHTML = `
+        <p><strong>Equation:</strong> ${rxn.eq}</p>
+        <p><strong>Type:</strong> ${rxn.type}</p>
+        <p>${rxn.desc}</p>
+    `;
+}
 
-        class Particle {
-            constructor(x, y, type) {
-                this.x = x; this.y = y; this.type = type;
-                this.radius = 20;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
-                ctx.fillStyle = activeRxn.type === "Exothermic" ? "#00e676" : "#ef4444";
-                ctx.fill();
-                // Energy Intake Lines for Endothermic
-                if(activeRxn.type === "Endothermic") {
-                    ctx.strokeStyle = "white";
-                    for(let i=0; i<4; i++) {
-                        ctx.beginPath(); ctx.moveTo(this.x, this.y);
-                        ctx.lineTo(this.x + Math.cos(i)*30, this.y + Math.sin(i)*30);
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
-
-        function initChamber() {
-            particles = [new Particle(100, 100, 'A'), new Particle(300, 300, 'B')];
-        }
-
-        function animate() {
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            particles.forEach(p => p.draw());
-            
-            // Logic: If collision and Exothermic -> Add Sparks
-            if(activeRxn.type === "Exothermic") {
-                // Add spark logic here
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-    </script>
+// Canvas simulation logic
+const canvas = document.getElementById('sandbox');
+const ctx = canvas.getContext('2d');
+function animate() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    // Draw atoms
+    ctx.fillStyle = "#ff69b4"; ctx.beginPath(); ctx.arc(200, 200, 20, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#00ffff"; ctx.beginPath(); ctx.arc(400, 200, 20, 0, Math.PI*2); ctx.fill();
+    // Endothermic visualization logic would go here
+    requestAnimationFrame(animate);
+}
+animate();
+</script>
 </body>
 </html>
