@@ -30,7 +30,7 @@
 
         /* 12-CHAPTER ACCORDION SIDEBAR */
         .fsc-sidebar {
-            width: 340px;
+            width: 350px;
             background-color: var(--sidebar-bg);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -110,3 +110,314 @@
         canvas { background-color: #070911; border-radius: 10px; border: 1px solid var(--border-color); }
 
         .slider-wrapper { width: 100%; margin-top: 20px; }
+        input[type="range"] {
+            width: 100%; height: 6px; background: var(--border-color);
+            border-radius: 4px; outline: none; accent-color: var(--fsc-green); cursor: pointer;
+        }
+
+        /* OVERLAY BRIEFING SCREEN */
+        .briefing-overlay {
+            position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px;
+            background-color: rgba(11, 13, 23, 0.96);
+            border: 1px solid var(--fsc-blue); border-radius: 16px;
+            padding: 40px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            z-index: 10; transition: opacity 0.3s ease;
+        }
+
+        .briefing-box { max-width: 650px; }
+        .briefing-box h2 { color: var(--fsc-blue); margin-bottom: 12px; font-size: 1.8rem; }
+        .briefing-text { color: var(--text-muted); line-height: 1.6; font-size: 1.05rem; margin-bottom: 30px; }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--fsc-blue), #00b0ff);
+            color: #fff; font-weight: 700; font-size: 1.1rem;
+            padding: 14px 35px; border: none; border-radius: 10px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(41, 182, 246, 0.3); transition: transform 0.2s;
+        }
+        .start-btn:hover { transform: translateY(-2px); }
+
+        /* ANALYTICS DISPLAY PANELS */
+        .analytics-deck { flex: 1; display: flex; flex-direction: column; gap: 14px; min-width: 320px; }
+        .stat-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 18px; }
+        .stat-label { font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.5px; }
+        .stat-val { font-size: 1.1rem; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="fsc-sidebar">
+        <div class="sidebar-header">
+            <h1>FSc Part-II Chemistry</h1>
+            <p>Syllabus Laboratory Simulation Module</p>
+        </div>
+        <div class="chapter-list">
+            
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(1)">
+                    <span>Chapter 1: Periodic Classification</span> <span id="arrow-1">▼</span>
+                </button>
+                <div id="container-1" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(2)">
+                    <span>Chapter 2: s-Block Elements</span> <span id="arrow-2">▼</span>
+                </button>
+                <div id="container-2" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(7)">
+                    <span>Chapter 7: Fundamental Principles</span> <span id="arrow-7">▼</span>
+                </button>
+                <div id="container-7" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(8)">
+                    <span>Chapter 8: Aliphatic Hydrocarbons</span> <span id="arrow-8">▼</span>
+                </button>
+                <div id="container-8" class="rxn-container" style="display: flex;">
+                    <button class="rxn-btn active" onclick="loadReaction(0, this)">Hydrogenation of Ethene</button>
+                    <button class="rxn-btn" onclick="loadReaction(1, this)">Hydrohalogenation of Propene</button>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(9)">
+                    <span>Chapter 9: Aromatic Hydrocarbons</span> <span id="arrow-9">▼</span>
+                </button>
+                <div id="container-9" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(10)">
+                    <span>Chapter 10: Alkyl Halides</span> <span id="arrow-10">▼</span>
+                </button>
+                <div id="container-10" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(11)">
+                    <span>Chapter 11: Alcohols & Phenols</span> <span id="arrow-11">▼</span>
+                </button>
+                <div id="container-11" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(12)">
+                    <span>Chapter 12: Aldehydes & Ketones</span> <span id="arrow-12">▼</span>
+                </button>
+                <div id="container-12" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(13)">
+                    <span>Chapter 13: Carboxylic Acids</span> <span id="arrow-13">▼</span>
+                </button>
+                <div id="container-13" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(14)">
+                    <span>Chapter 14: Macromolecules</span> <span id="arrow-14">▼</span>
+                </button>
+                <div id="container-14" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(15)">
+                    <span>Chapter 15: Chemical Industries</span> <span id="arrow-15">▼</span>
+                </button>
+                <div id="container-15" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+            <div class="chapter-accordion">
+                <button class="chapter-header" onclick="toggleChapter(16)">
+                    <span>Chapter 16: Environmental Chemistry</span> <span id="arrow-16">▼</span>
+                </button>
+                <div id="container-16" class="rxn-container">
+                    <div style="padding:10px; font-size:0.75rem; color:var(--text-muted)">Waiting for reaction list...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="workspace-stage">
+        
+        <div id="briefingScreen" class="briefing-overlay">
+            <div class="briefing-box">
+                <h2 id="briefingTitle">Hydrogenation of Ethene</h2>
+                <p id="briefingExplanation" class="briefing-text">
+                    In accordance with Chapter 8, alkenes react with hydrogen gas in the presence of a finely divided Nickel catalyst at high thermal boundaries (250°C) to yield corresponding alkanes. This mechanism maps exothermic addition values directly.
+                </p>
+                <button class="start-btn" onclick="closeBriefing()">Start Practical Simulation</button>
+            </div>
+        </div>
+
+        <h2 id="mainHeading" style="margin:0; font-size:1.5rem; font-weight:700;">Reaction Chamber Dashboard</h2>
+
+        <div class="layout-grid">
+            <div class="chamber-card">
+                <canvas id="sandbox" width="580" height="360"></canvas>
+                <div class="slider-wrapper">
+                    <div style="font-size:0.85rem; font-weight:600; display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:var(--text-muted)">CRITICAL SYSTEM HEAT</span>
+                        <span id="tempDisplay" style="color:var(--fsc-green)">25°C</span>
+                    </div>
+                    <input type="range" id="tempSlider" min="25" max="600" value="25">
+                </div>
+            </div>
+
+            <div class="analytics-deck">
+                <div class="stat-card" style="border-left: 4px solid var(--fsc-blue)">
+                    <div class="stat-label">Textbook Equation Model</div>
+                    <div id="equationModel" class="stat-val" style="color:var(--fsc-blue)">CH₂=CH₂ + H₂ → CH₃-CH₃</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Required Activation Temp</div>
+                    <div id="targetTemp" class="stat-val" style="color:var(--fsc-orange)">250°C (Nickel Catalyst Active)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Main Yield Count</div>
+                    <div id="mainYield" class="stat-val" style="color:var(--fsc-green)">0 Ethane molecules combined</div>
+                </div>
+                <div class="stat-card" style="background: rgba(255, 145, 0, 0.03);">
+                    <div class="stat-label">By-Products Released</div>
+                    <div id="byProductYield" class="stat-val" style="color:var(--fsc-orange)">None (100% Atom Economy)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fscLibrary = [
+            { title: "Hydrogenation of Ethene", formula: "CH₂=CH₂ + H₂ → CH₃-CH₃", temp: 250, desc: "Textbook Rule: Alkenes undergo catalytic hydrogenation at 250°C to 300°C using a metal Nickel catalyst. The pi-bond breaks cleanly to produce saturated Ethane safely.", mainOut: "Ethane", byproduct: "None (100% Atom Economy)" },
+            { title: "Hydrohalogenation (Markovnikov's Rule)", formula: "CH₃-CH=CH₂ + HCl → CH₃-CH(Cl)-CH₃", temp: 100, desc: "Textbook Rule: Electrophilic addition of an unsymmetrical reagent follows Markovnikov's rule. The hydrogen ion hooks onto the carbon containing greater hydrogen pairs.", mainOut: "2-Chloropropane", byproduct: "Trace unreacted isomers" }
+        ];
+
+        let activeReaction = fscLibrary[0];
+        const canvas = document.getElementById('sandbox'); const ctx = canvas.getContext('2d');
+        const tempSlider = document.getElementById('tempSlider'); const tempDisplay = document.getElementById('tempDisplay');
+        const briefingScreen = document.getElementById('briefingScreen');
+
+        let temperature = 25; let particles = []; let draggedParticle = null;
+
+        function toggleChapter(id) {
+            const container = document.getElementById(`container-${id}`);
+            if (!container) return;
+            const isVisible = container.style.display === 'flex';
+            
+            document.querySelectorAll('.rxn-container').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('[id^="arrow-"]').forEach(a => a.textContent = '▼');
+            
+            if(!isVisible) { 
+                container.style.display = 'flex'; 
+                const arrow = document.getElementById(`arrow-${id}`);
+                if (arrow) arrow.textContent = '▲'; 
+            }
+        }
+
+        function loadReaction(index, element) {
+            document.querySelectorAll('.rxn-btn').forEach(b => b.classList.remove('active'));
+            element.active = true;
+            element.classList.add('active');
+            
+            activeReaction = fscLibrary[index];
+            
+            document.getElementById('briefingTitle').textContent = activeReaction.title;
+            document.getElementById('briefingExplanation').textContent = activeReaction.desc;
+            document.getElementById('equationModel').textContent = activeReaction.formula;
+            document.getElementById('targetTemp').textContent = `${activeReaction.temp}°C Required`;
+            document.getElementById('mainYield').textContent = `0 ${activeReaction.mainOut} molecules combined`;
+            document.getElementById('byProductYield').textContent = activeReaction.byproduct;
+            
+            briefingScreen.style.opacity = '1'; briefingScreen.style.pointerEvents = 'auto';
+        }
+
+        function closeBriefing() {
+            briefingScreen.style.opacity = '0'; briefingScreen.style.pointerEvents = 'none';
+            initChamber();
+        }
+
+        class Atom {
+            constructor(x, y, label) {
+                this.x = x; this.y = y; this.label = label; this.bonded = false;
+                this.radius = label.length > 4 ? 24 : 16;
+                this.vx = (Math.random() - 0.5) * 1.5; this.vy = (Math.random() - 0.5) * 1.5;
+            }
+            update() {
+                if(this === draggedParticle) return;
+                let currentSpeed = 1 + (temperature - 25) * 0.012;
+                this.x += this.vx * currentSpeed; this.y += this.vy * currentSpeed;
+
+                if(this.x - this.radius < 0 || this.x + this.radius > canvas.width) this.vx *= -1;
+                if(this.y - this.radius < 0 || this.y + this.radius > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = "var(--chapter-bg)";
+                ctx.strokeStyle = "var(--border-color)";
+                ctx.lineWidth = 2; ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "#fff"; ctx.font = "bold 9px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+                ctx.fillText(this.label, this.x, this.y);
+            }
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const r = canvas.getBoundingClientRect(); const mx = e.clientX - r.left; const my = e.clientY - r.top;
+            for(let p of particles) {
+                let dx = mx - p.x; let dy = my - p.y;
+                if(Math.sqrt(dx*dx + dy*dy) < p.radius + 8) { draggedParticle = p; break; }
+            }
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            if(!draggedParticle) return;
+            const r = canvas.getBoundingClientRect();
+            draggedParticle.x = e.clientX - r.left; draggedParticle.y = e.clientY - r.top;
+        });
+        window.addEventListener('mouseup', () => { draggedParticle = null; });
+
+        tempSlider.addEventListener('input', (e) => {
+            temperature = parseInt(e.target.value); tempDisplay.textContent = `${temperature}°C`;
+        });
+
+        function initChamber() {
+            particles = [];
+            for(let i=0; i<6; i++) {
+                particles.push(new Atom(Math.random()*400+50, Math.random()*260+50, "CH₂=CH₂"));
+                particles.push(new Atom(Math.random()*400+50, Math.random()*260+50, "H₂"));
+            }
+        }
+
+        function runLoop() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(runLoop);
+        }
+        initChamber(); runLoop();
+    </script>
+</body>
+</html>
