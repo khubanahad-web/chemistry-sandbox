@@ -4,103 +4,90 @@
     <meta charset="UTF-8">
     <title>FSc Chemistry Learning Portal</title>
     <style>
-        :root {
-            --navy-gate: #0a1128; --studio-bg: #070b19; --sidebar-bg: #0f1426;
-            --card-bg: #131a33; --border-color: #24315e; --skin-btn: #eecda3;
-        }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--studio-bg); color: #fff; font-family: sans-serif; overflow: hidden; }
-
-        /* GATEWAY */
-        .gateway-screen { position: fixed; width: 100%; height: 100%; background-color: var(--navy-gate); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .skin-button { background-color: var(--skin-btn); color: #2c1a04; font-weight: 700; padding: 15px 38px; border: none; border-radius: 12px; cursor: pointer; margin: 10px; }
-
-        /* PORTAL LAYOUT - WORKSPACE IS NOW MAXIMIZED */
-        .portal-layout { display: none; height: 100vh; width: 100vw; display: flex; }
-        .fsc-sidebar { width: 250px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); padding: 20px; }
-        .workspace-stage { flex: 1; padding: 10px; position: relative; }
+        :root { --navy: #0a1128; --sidebar: #0f1426; --accent: #eecda3; --bg: #070b19; }
+        body, html { margin:0; padding:0; height:100%; background: var(--bg); color: #fff; font-family: sans-serif; overflow:hidden; }
         
-        canvas { background-color: #050710; border: 1px solid var(--border-color); border-radius: 10px; width: 100%; height: 100%; display: block; }
+        #gateway { position:fixed; width:100%; height:100%; background:var(--navy); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100; }
+        .btn { background: var(--accent); color:#000; padding:15px 30px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; margin:10px; }
+
+        #main-ui { display:none; height:100vh; display:flex; }
+        #sidebar { width: 350px; background: var(--sidebar); border-right: 1px solid #24315e; padding:20px; overflow-y:auto; }
+        #workspace { flex:1; position:relative; padding:10px; }
         
-        .briefing-popup-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 11, 25, 0.9); z-index: 50; display: none; justify-content: center; align-items: center; }
-        .briefing-card { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 30px; border-radius: 20px; text-align: center; }
+        canvas { background: #050710; width:100%; height:100%; border-radius:10px; display:block; }
+        
+        #popup { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(7,11,25,0.9); display:flex; justify-content:center; align-items:center; z-index:50; }
+        .card { background:#131a33; padding:40px; border-radius:20px; text-align:center; }
     </style>
 </head>
 <body>
 
-    <div id="gatewayScreen" class="gateway-screen">
-        <h1>FSc Chemistry Learning Portal</h1>
-        <div>
-            <button class="skin-button" onclick="enterPortal('Part-I')">FSc Part-I</button>
-            <button class="skin-button" onclick="enterPortal('Part-II')">FSc Part-II</button>
-        </div>
+<div id="gateway">
+    <h1>FSc Chemistry Learning Portal</h1>
+    <div>
+        <button class="btn" onclick="initPortal('Part-I')">FSc Part-I</button>
+        <button class="btn" onclick="initPortal('Part-II')">FSc Part-II</button>
     </div>
+</div>
 
-    <div id="portalLayout" class="portal-layout">
-        <div class="fsc-sidebar">
-            <h2 id="cohortTitle">FSc Chemistry</h2>
-            <div id="side-info">Select a reaction to begin.</div>
+<div id="main-ui">
+    <div id="sidebar">
+        <h2 id="title">FSc Chemistry</h2>
+        <div id="chaps">
+            <div style="padding:10px; border-bottom:1px solid #24315e; cursor:pointer;" onclick="showPopup('Hydrogenation of Ethene', 'CH₂=CH₂ + H₂ → CH₃-CH₃')">Chapter 8: Hydrogenation of Ethene</div>
+            <div style="padding:10px; border-bottom:1px solid #24315e; cursor:pointer;" onclick="showPopup('Hydrohalogenation', 'CH₃-CH=CH₂ + HCl → Product')">Chapter 8: Hydrohalogenation</div>
         </div>
-        <div class="workspace-stage">
-            <div id="briefingPopup" class="briefing-popup-overlay">
-                <div class="briefing-card">
-                    <h2 id="r-title">Hydrogenation of Ethene</h2>
-                    <p id="r-eq">CH₂=CH₂ + H₂ → CH₃-CH₃</p>
-                    <button class="skin-button" onclick="closeBriefing()">Understood, Enter Simulation</button>
-                </div>
+        <div id="side-info" style="margin-top:20px; color:#8fa0c0;"></div>
+    </div>
+    <div id="workspace">
+        <div id="popup" style="display:none;">
+            <div class="card">
+                <h2 id="p-title"></h2>
+                <p id="p-eq" style="font-size:1.5rem; color:#29b6f6;"></p>
+                <button class="btn" onclick="closePopup()">Understood, Enter Simulation</button>
             </div>
-            <canvas id="sandbox"></canvas>
         </div>
+        <canvas id="sandbox"></canvas>
     </div>
+</div>
 
-    <script>
-        const canvas = document.getElementById('sandbox');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+<script>
+    const canvas = document.getElementById('sandbox');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
 
-        function enterPortal(cohort) {
-            document.getElementById('gatewayScreen').style.display = 'none';
-            document.getElementById('portalLayout').style.display = 'flex';
-            document.getElementById('cohortTitle').textContent = `FSc ${cohort}`;
-            document.getElementById('briefingPopup').style.display = 'flex';
-            // Set canvas size dynamically
-            canvas.width = canvas.parentElement.clientWidth - 20;
-            canvas.height = canvas.parentElement.clientHeight - 20;
-        }
-
-        function closeBriefing() {
-            document.getElementById('briefingPopup').style.display = 'none';
-            document.getElementById('side-info').innerHTML = "<p><strong>Active Reaction:</strong> Hydrogenation of Ethene</p>";
-            initChamber();
-        }
-
-        class Atom {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 4;
-                this.vy = (Math.random() - 0.5) * 4;
-            }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath(); ctx.arc(this.x, this.y, 15, 0, Math.PI*2);
-                ctx.fillStyle = "#ff65a3"; ctx.fill();
-            }
-        }
-
-        function initChamber() {
-            for(let i=0; i<15; i++) particles.push(new Atom());
-        }
-
-        function animate() {
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
-        }
+    function initPortal(cohort) {
+        document.getElementById('gateway').style.display = 'none';
+        document.getElementById('main-ui').style.display = 'flex';
+        document.getElementById('title').textContent = "FSc " + cohort;
+        canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
         animate();
-    </script>
+    }
+
+    function showPopup(title, eq) {
+        document.getElementById('popup').style.display = 'flex';
+        document.getElementById('p-title').textContent = title;
+        document.getElementById('p-eq').textContent = eq;
+        window.tempTitle = title; window.tempEq = eq;
+    }
+
+    function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+        document.getElementById('side-info').innerHTML = `<h3>${window.tempTitle}</h3><p>${window.tempEq}</p>`;
+        particles = [];
+        for(let i=0; i<20; i++) particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*4, vy:(Math.random()-0.5)*4});
+    }
+
+    function animate() {
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.x += p.vx; p.y += p.vy;
+            if(p.x<0 || p.x>canvas.width) p.vx*=-1;
+            if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+            ctx.fillStyle = "#ff65a3"; ctx.beginPath(); ctx.arc(p.x,p.y,15,0,Math.PI*2); ctx.fill();
+        });
+        requestAnimationFrame(animate);
+    }
+</script>
 </body>
 </html>
