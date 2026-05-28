@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Web App: Master Lab Sandbox</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0b0e14;
+            color: #c9d1d9;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+
+        h1 {
+            color: #ff7b72;
+            margin-bottom: 20px;
+        }
+
+        .app-layout {
+            display: flex;
+            gap: 20px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        canvas {
+            background-color: #000000;
+            border: 2px solid #484f58;
+            border-radius: 8px;
+            cursor: grab;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .sidebar {
+            flex: 1;
+            background-color: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 320px;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            color: #58a6ff;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+        }
+
+        .info-box {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 250px;
+            accent-color: #ff7b72;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Interactive Chemical Reactor App</h1>
+    
+    <div class="app-layout">
+        <div class="left-panel">
+            <canvas id="sandbox" width="680" height="400"></canvas>
+            
+            <div class="controls">
+                <div class="slider-group">
+                    <label for="tempSlider">Thermal Energy: <span id="tempValue" style="color:#ff7b72;">25</span>°C</label>
+                    <input type="range" id="tempSlider" min="25" max="600" value="25">
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <h2>Reaction Blueprint</h2>
+            
+            <div class="info-box">
+                <div class="info-label">Lab Mechanics Profile</div>
+                <div class="info-value" id="labStatusText" style="color: #ff7b72;">Chamber too cold! Activation Energy not met.</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Chemical Equation Label</div>
+                <div class="info-value" id="equationText" style="color: #58a6ff;">2Na(s) + Cl₂(g) → No Reaction</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Real-time Observations</div>
+                <div class="info-value" id="observationText" style="color: #e3b341;">Atoms collide but bounce away without a reaction below 150°C.</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Product Status Dashboard</div>
+                <div class="info-value">Salt Created: <span id="saltCountDisplay" style="color: #56d364;">0</span> units</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('sandbox');
+        const ctx = canvas.getContext('2d');
+        const tempSlider = document.getElementById('tempSlider');
+        const tempValue = document.getElementById('tempValue');
+        
+        const labStatusText = document.getElementById('labStatusText');
+        const equationText = document.getElementById('equationText');
+        const observationText = document.getElementById('observationText');
+        const saltCountDisplay = document.getElementById('saltCountDisplay');
+
+        let temperature = 25;
+        let particles = [];
+        let sparks = [];
+        let saltCount = 0;
+        let reactionTriggered = false;
+        let draggedParticle = null;
+
+        const getSpeedFactor = () => 1 + (temperature - 25) * 0.015;
+
+        // Glowing Exploding Sparks Class Structure
+        class Spark {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 2;
+                this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+            }
+            update() { this.x += this.vx; this.y += this.vy; this.alpha -= 0.04; }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffea70';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ffca3a';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, type) {
+                this.x = x; this.y = y;
+                this.type = type; 
+                this.bondedTo = null; 
+                this.isParent = false; 
+                this.flashFrames = 0;
+                
+                if (this.type === 'Na') {
+                    this.radius = 24;          
+                    this.color = '#ff65a3';     
+                    this.weightFactor = 0.3;   
+                } else {
+                    this.radius = 14;          
+                    this.color = '#38bdf8';     
+                    this.weightFactor = 1.8;   
+                }
+
+                const angle = Math.random() * Math.PI * 2;
+                this.baseSpeed = (0.2 + Math.random() * 0.4) * this.weightFactor;
+                this.vx = Math.cos(angle) * this.baseSpeed; 
+                this.vy = Math.sin(angle) * this.baseSpeed;
+            }
+
+            update() {
+                if (this === draggedParticle) return; 
+
+                const currentSpeed = getSpeedFactor();
+                
+                if (this.bondedTo && this.isParent) {
+                    this.x += this.vx * currentSpeed;
+                    this.y += this.vy * currentSpeed;
+                    
+                    this.bondedTo.x = this.x + Math.cos(this.bondAngle) * 38;
+                    this.bondedTo.y = this.y + Math.sin(this.bondAngle) * 38;
+                } else if (!this.bondedTo) {
+                    this.x += this.vx * currentSpeed;
+                    this.y += this.vy * currentSpeed;
+                }
+                this.handleWallCollisions();
+            }
+
+            handleWallCollisions() {
+                let r = this.radius;
+                if (this.bondedTo) r = 35; 
+
+                if (this.x - this.radius < 0) { this.x = this.radius; this.vx *= -1; if(this.bondedTo) this.bondedTo.vx *= -1; }
+                if (this.x + r > canvas.width) { this.x = canvas.width - r; this.vx *= -1; if(this.bondedTo) this.bondedTo.vx *= -1; }
+                if (this.y - this.radius < 0) { this.y = this.radius; this.vy *= -1; if(this.bondedTo) this.bondedTo.vy *= -1; }
+                if (this.y + r > canvas.height) { this.y = canvas.height - r; this.vy *= -1; if(this.bondedTo) this.bondedTo.vy *= -1; }
+            }
+
+            draw() {
+                ctx.beginPath(); 
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                
+                // INTENSE FLASH ANIMATION TRIGGER CONTROL MAPPED SAFELY HERE
+                if (this.flashFrames > 0) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowBlur = 35;
+                    ctx.shadowColor = '#ffea70';
+                    this.flashFrames--;
+                } else {
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 0; 
+                }
+                ctx.fill(); 
+                ctx.closePath();
+                ctx.shadowBlur = 0; 
+
+                // Draw bounding green chemical attachment link rings if bonded
+                if (this.bondedTo && this.flashFrames === 0) {
+                    ctx.strokeStyle = 'rgba(86, 211, 100, 0.6)';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+
+                // Elements keep internal identifiers Na or Cl always
+                ctx.fillStyle = '#ffffff'; 
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center'; 
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.type, this.x, this.y);
+            }
+        }
+
+        function checkReactions() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    let p1 = particles[i]; let p2 = particles[j];
+
+                    if (((p1.type === 'Na' && p2.type === 'Cl') || (p1.type === 'Cl' && p2.type === 'Na')) && !p1.bondedTo && !p2.bondedTo) {
+                        let dx = p2.x - p1.x; let dy = p2.y - p1.y;
+                        let distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < (p1.radius + p2.radius + 4)) {
+                            
+                            // STRICT REACTION GATEWAY CONDITIONAL RULE
+                            if (temperature >= 150) {
+                                p1.bondedTo = p2; p2.bondedTo = p1;
+                                p1.isParent = true; 
+                                p2.isParent = false;
+                                
+                                // High power glowing parameters ignite dynamically right here
+                                p1.flashFrames = 25; p2.flashFrames = 25;
+                                
+                                p1.vx = (p1.vx + p2.vx) * 0.3;
+                                p1.vy = (p1.vy + p2.vy) * 0.3;
+
+                                p1.bondAngle = Math.atan2(dy, dx);
+                                p2.bondAngle = Math.atan2(-dy, -dx);
+                                
+                                // Shoot massive visual spark bursts across collision coordinates
+                                for (let k = 0; k < 25; k++) {
+                                    sparks.push(new Spark((p1.x + p2.x)/2, (p1.y + p2.y)/2));
+                                }
+
+                                saltCount++;
+                                reactionTriggered = true;
+                                updateSidebarText();
+                            } else {
+                                // If temperature is below 150, push them away completely!
+                                if (p1 === draggedParticle) {
+                                    p2.x += dx * 0.2; p2.y += dy * 0.2;
+                                } else if (p2 === draggedParticle) {
+                                    p1.x -= dx * 0.2; p1.y -= dy * 0.2;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function updateSidebarText() {
+            saltCountDisplay.textContent = saltCount;
+            if (reactionTriggered) {
+                equationText.innerHTML = "2Na(s) + Cl₂(g) &rarr; 2NaCl(s) <span style='color:#56d364;'>(SYNTHESIS)</span>";
+                observationText.textContent = "Exothermic synthesis activated successfully! Atoms flashed with energy and locked together as stable NaCl salt molecules.";
+                observationText.style.color = "#56d364";
+            }
+        }
+
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(e);
+            for (let p of particles) {
+                let dx = pos.x - p.x; let dy = pos.y - p.y;
+                if (Math.sqrt(dx * dx + dy * dy) < p.radius + 5) {
+                    draggedParticle = p;
+                    break;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!draggedParticle) return;
+            const pos = getMousePos(e);
+            
+            draggedParticle.x = pos.x;
+            draggedParticle.y = pos.y;
+
+            if (draggedParticle.bondedTo) {
+                if (draggedParticle.isParent) {
+                    draggedParticle.bondedTo.x = pos.x + Math.cos(draggedParticle.bondAngle) * 38;
+                    draggedParticle.bondedTo.y = pos.y + Math.sin(draggedParticle.bondAngle) * 38;
+                } else {
+                    draggedParticle.bondedTo.x = pos.x + Math.cos(draggedParticle.bondedTo.bondAngle) * -38;
+                    draggedParticle.bondedTo.y = pos.y + Math.sin(draggedParticle.bondedTo.bondAngle) * -38;
+                }
+            }
+        });
+
+        window.addEventListener('mouseup', () => { draggedParticle = null; });
+
+        tempSlider.addEventListener('input', (e) => {
+            temperature = parseInt(e.target.value);
+            tempValue.textContent = temperature;
+            
+            if (temperature < 150) {
+                labStatusText.textContent = "Chamber too cold! Activation Energy not met.";
+                labStatusText.style.color = "#ff7b72";
+                if(!reactionTriggered) {
+                    observationText.textContent = "Atoms collide but bounce away without a reaction below 150°C.";
+                    observationText.style.color = "#e3b341";
+                }
+            } else {
+                labStatusText.textContent = "Optimal Temperature Achieved! Ready to React.";
+                labStatusText.style.color = "#58a6ff";
+                if(!reactionTriggered) {
+                    observationText.textContent = "Chamber hot enough! Smash atoms together or let them collide naturally to ignite.";
+                    observationText.style.color = "#58a6ff";
+                }
+            }
+        });
+
+        function init() {
+            particles = []; sparks = []; saltCount = 0; reactionTriggered = false;
+            equationText.textContent = "2Na(s) + Cl₂(g) → No Reaction";
+            observationText.textContent = "Atoms collide but bounce away without a reaction below 150°C.";
+            observationText.style.color = "#e3b341";
+            saltCountDisplay.textContent = "0";
+
+            for (let i = 0; i < 10; i++) {
+                particles.push(new Particle(Math.random() * 500 + 50, Math.random() * 280 + 50, 'Na'));
+                particles.push(new Particle(Math.random() * 500 + 50, Math.random() * 280 + 50, 'Cl'));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            checkReactions();
+            sparks = sparks.filter(s => s.alpha > 0);
+            sparks.forEach(s => { s.update(); s.draw(); });
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
