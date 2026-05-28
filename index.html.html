@@ -1,129 +1,98 @@
-<script>
-        const masterLibrary = [
-            { title: "Hydrogenation of Ethene", formula: "CH₂=CH₂ + H₂ → CH₃-CH₃", points: "Saturated alkane transformation.", temp: 250, catalyst: "Finely divided Nickel (Ni)", byproduct: "None", t1: "Ethene", t2: "H₂", c1: "#ff65a3", c2: "#29b6f6", r1:21, r2:14, type: "Exothermic" },
-            { title: "Hydrohalogenation of Propene", formula: "CH₃-CH=CH₂ + HCl → Product", points: "Electrophilic addition.", temp: 100, catalyst: "None", byproduct: "Trace isomers", t1: "Propene", t2: "HCl", c1: "#ff9100", c2: "#00e676", r1:24, r2:15, type: "Endothermic" }
-        ];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FSc Chemistry Learning Portal</title>
+    <style>
+        :root {
+            --navy-gate: #0a1128;
+            --studio-bg: #070b19;
+            --sidebar-bg: #0f1426;
+            --border-color: #24315e;
+            --skin-btn: #eecda3;
+            --text-main: #f0f4f8;
+            --fsc-blue: #29b6f6;
+        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--studio-bg); color: var(--text-main); font-family: sans-serif; overflow: hidden; }
 
-        let activeRxn = masterLibrary[0];
-        let temperature = 25; 
-        let particles = []; 
-        let draggedParticle = null;
+        .gateway-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--navy-gate); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        .skin-button { background-color: var(--skin-btn); color: #2c1a04; font-weight: 700; padding: 15px 38px; border: none; border-radius: 12px; cursor: pointer; }
+        
+        .portal-layout { display: none; height: 100%; width: 100%; display: flex; }
+        .fsc-sidebar { width: 350px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); padding: 20px; }
+        .workspace-stage { flex: 1; padding: 25px; position: relative; background: var(--studio-bg); }
+        canvas { background-color: #050710; border: 1px solid var(--border-color); border-radius: 10px; width: 100%; height: 80%; }
+        
+        .briefing-popup-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(7, 11, 25, 0.95); z-index: 50; display: none; justify-content: center; align-items: center; }
+        .briefing-card { background-color: #131a33; border: 1px solid var(--border-color); border-radius: 20px; padding: 35px; width: 500px; }
+    </style>
+</head>
+<body>
 
-        const canvas = document.getElementById('sandbox'); 
+    <div id="gatewayScreen" class="gateway-screen">
+        <h1>FSc Chemistry Learning Portal</h1>
+        <button class="skin-button" onclick="enterPortal()">Enter Portal</button>
+    </div>
+
+    <div id="portalLayout" class="portal-layout">
+        <div class="fsc-sidebar">
+            <h2>FSc Chemistry</h2>
+            <div id="side-info">Select a reaction to begin.</div>
+        </div>
+        <div class="workspace-stage">
+            <div id="briefingPopup" class="briefing-popup-overlay">
+                <div class="briefing-card">
+                    <h2 id="popupTitle">Hydrogenation of Ethene</h2>
+                    <p>Temperature: <span id="popTemp">250</span>°C</p>
+                    <button class="skin-button" onclick="closeBriefing()">Understood, Enter Simulation</button>
+                </div>
+            </div>
+            <canvas id="sandbox"></canvas>
+            <input type="range" id="tempSlider" min="25" max="600" value="25" style="width:100%;">
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('sandbox');
         const ctx = canvas.getContext('2d');
-        const tempSlider = document.getElementById('tempSlider'); 
-        const tempDisplay = document.getElementById('tempDisplay');
+        let particles = [], temp = 25, type = "Exothermic";
 
-        function enterPortal(cohort) {
-            document.getElementById('gatewayScreen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('gatewayScreen').style.display = 'none';
-                document.getElementById('portalLayout').style.display = 'flex';
-                document.getElementById('sidebarCohortTitle').textContent = `FSc ${cohort} Chemistry`;
-                toggleChapter(8);
-            }, 300);
-        }
-
-        function toggleChapter(id) {
-            const container = document.getElementById(`box-${id}`);
-            if(!container) return;
-            const isVisible = container.style.display === 'flex';
-            document.querySelectorAll('.rxn-container').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('[id^="arr-"]').forEach(a => a.textContent = '▼');
-            if(!isVisible) { container.style.display = 'flex'; document.getElementById(`arr-${id}`).textContent = '▲'; }
-        }
-
-        function triggerBriefing(index, element) {
-            document.querySelectorAll('.rxn-btn').forEach(b => b.classList.remove('active'));
-            if(element) element.classList.add('active');
-            activeRxn = masterLibrary[index];
-            document.getElementById('popupTitle').textContent = activeRxn.title;
-            document.getElementById('popPoints').textContent = activeRxn.points;
-            document.getElementById('popTemp').textContent = activeRxn.temp + "°C";
-            document.getElementById('popCatalyst').textContent = activeRxn.catalyst;
-            document.getElementById('popByproduct').textContent = activeRxn.byproduct;
-            document.getElementById('textbookEq').textContent = activeRxn.formula;
-            document.getElementById('activeCatLabel').textContent = activeRxn.catalyst;
-            document.getElementById('briefingPopup').style.display = 'flex';
-        }
-
-        function closeBriefingPopup() {
-            document.getElementById('briefingPopup').style.display = 'none';
+        function enterPortal() {
+            document.getElementById('gatewayScreen').style.display = 'none';
+            document.getElementById('portalLayout').style.display = 'flex';
+            canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
             initChamber();
+            animate();
+        }
+
+        function closeBriefing() {
+            document.getElementById('briefingPopup').style.display = 'none';
         }
 
         class Atom {
-            constructor(x, y, label, color, r) {
-                this.x = x; this.y = y; this.label = label; this.color = color; this.radius = r;
-                this.vx = (Math.random() - 0.5) * 1.5; this.vy = (Math.random() - 0.5) * 1.5;
-            }
-            update() {
-                if(this === draggedParticle) return;
-                let speedFactor = 1 + (temperature - 25) * 0.012;
-                this.x += this.vx * speedFactor; this.y += this.vy * speedFactor;
-                if(this.x - this.radius < 0 || this.x + this.radius > canvas.width) this.vx *= -1;
-                if(this.y - this.radius < 0 || this.y + this.radius > canvas.height) this.vy *= -1;
+            constructor() {
+                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 4; this.vy = (Math.random() - 0.5) * 4;
             }
             draw() {
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color; ctx.shadowBlur = 0; ctx.fill(); ctx.closePath();
-                ctx.fillStyle = "#000000"; ctx.font = "bold 9px sans-serif"; ctx.textAlign="center"; ctx.fillText(this.label, this.x, this.y);
-            }
-        }
-
-        // Energy Effect Function
-        function drawEnergyEffect(p) {
-            ctx.beginPath();
-            if (activeRxn.type === "Exothermic") {
-                ctx.strokeStyle = "#ffeb3b"; // Yellow Spark
-                for(let i=0; i<4; i++) {
-                    let a = i * Math.PI/2;
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p.x + Math.cos(a)*40, p.y + Math.sin(a)*40);
-                }
-            } else {
-                ctx.strokeStyle = "red"; // Red Blurry Lines
-                for(let i=0; i<6; i++) {
-                    let a = i * Math.PI/3;
-                    ctx.moveTo(p.x + Math.cos(a)*10, p.y + Math.sin(a)*10);
-                    ctx.lineTo(p.x + Math.cos(a)*30, p.y + Math.sin(a)*30);
+                ctx.beginPath(); ctx.arc(this.x, this.y, 15, 0, Math.PI*2);
+                ctx.fillStyle = "#ff65a3"; ctx.fill();
+                // Energy Logic
+                if (Math.abs(temp - 250) < 50) {
+                    ctx.strokeStyle = (type === "Exothermic") ? "yellow" : "red";
+                    ctx.moveTo(this.x, this.y); ctx.lineTo(this.x+20, this.y+20);
+                    ctx.stroke();
                 }
             }
-            ctx.stroke();
         }
 
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect(); 
-            const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
-            for(let p of particles) {
-                if(Math.hypot(mx - p.x, my - p.y) < p.radius + 12) { draggedParticle = p; break; }
-            }
-        });
-        window.addEventListener('mouseup', () => { draggedParticle = null; });
-
-        tempSlider.addEventListener('input', (e) => {
-            temperature = parseInt(e.target.value); 
-            tempDisplay.textContent = temperature + "°C";
-        });
-
-        function initChamber() {
-            particles = [];
-            for(let i=0; i<6; i++) {
-                particles.push(new Atom(Math.random()*400+60, Math.random()*230+60, activeRxn.t1, activeRxn.c1, activeRxn.r1));
-                particles.push(new Atom(Math.random()*400+60, Math.random()*230+60, activeRxn.t2, activeRxn.c2, activeRxn.r2));
-            }
+        function initChamber() { for(let i=0; i<10; i++) particles.push(new Atom()); }
+        function animate() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.draw(); });
+            requestAnimationFrame(animate);
         }
-
-        function renderLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update(); p.draw();
-                // Only show effect if temp is near the requirement
-                if(Math.abs(temperature - activeRxn.temp) < 40) {
-                    drawEnergyEffect(p);
-                }
-            });
-            requestAnimationFrame(renderLoop);
-        }
-        renderLoop();
+        document.getElementById('tempSlider').oninput = (e) => temp = e.target.value;
     </script>
+</body>
+</html>
