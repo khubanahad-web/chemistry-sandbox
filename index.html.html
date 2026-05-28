@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FSc Interactive ChemStudio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --navy-gate: #0a1128;
@@ -29,23 +28,11 @@
             overflow: hidden; user-select: none;
         }
 
-        /* Confetti Canvas */
-        #confettiCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
-
-        /* BACK BUTTON STYLE */
-        .back-btn {
-            background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
-            padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; transition: 0.3s;
-            font-family: 'Orbitron', sans-serif; font-size: 0.8rem;
-        }
-        .back-btn:hover { border-color: var(--fsc-blue); color: var(--fsc-blue); }
-
-        /* SCREEN 1: PORTAL GATEWAY */
         .gateway-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--navy-gate); display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 100;
-            transition: all 0.4s ease; font-family: 'Orbitron', sans-serif;
+            transition: all 0.4s ease;
         }
         .gateway-title { font-size: 2.6rem; font-weight: 800; margin-bottom: 10px; color: #ffffff; text-align: center; }
         .gateway-subtitle { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 40px; text-align: center; }
@@ -58,11 +45,10 @@
         }
         .skin-button:hover { background-color: var(--skin-btn-hover); transform: translateY(-2px); }
 
-        /* PORTAL SYSTEM APP LAYOUT */
         .portal-layout { display: none; height: 100%; width: 100%; }
         .fsc-sidebar { width: 350px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; height: 100%; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); }
-        .sidebar-header h1 { font-size: 1.25rem; margin: 0; font-weight: 800; color: var(--fsc-blue); font-family: 'Orbitron', sans-serif; }
+        .sidebar-header h1 { font-size: 1.25rem; margin: 0; font-weight: 800; color: var(--fsc-blue); }
         .sidebar-header p { margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-muted); }
         .chapter-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
         .chapter-accordion { background-color: var(--chapter-bg); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
@@ -89,7 +75,7 @@
             padding: 20px; box-sizing: border-box;
         }
         .briefing-card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; padding: 30px; max-width: 680px; width: 100%; text-align: center; }
-        .briefing-card h2 { margin: 0 0 5px 0; color: #ffffff; font-size: 1.6rem; font-family: 'Orbitron', sans-serif; }
+        .briefing-card h2 { margin: 0 0 5px 0; color: #ffffff; font-size: 1.6rem; }
         .preview-eq-banner { font-size: 1.4rem; font-weight: 700; color: var(--fsc-blue); margin: 15px 0; font-family: monospace; }
         
         .preview-anim-box {
@@ -132,8 +118,6 @@
 </head>
 <body>
 
-    <canvas id="confettiCanvas"></canvas>
-
     <div id="gatewayScreen" class="gateway-screen">
         <h1 class="gateway-title">FSc Chemistry Learning Portal</h1>
         <p class="gateway-subtitle">Select your curriculum cohort to begin laboratory simulations</p>
@@ -151,9 +135,6 @@
             </div>
             <div class="chapter-list">
                 <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(1)"><span>Chapter 1: Periodic Classification</span><span id="arr-1">▼</span></button><div id="box-1" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(2)"><span>Chapter 2: s-Block Elements</span><span id="arr-2">▼</span></button><div id="box-2" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(7)"><span>Chapter 7: Fundamental Principles</span><span id="arr-7">▼</span></button><div id="box-7" class="rxn-container"></div></div>
-                
                 <div class="chapter-accordion">
                     <button class="chapter-header" onclick="toggleChapter(8)"><span>Chapter 8: Aliphatic Hydrocarbons</span><span id="arr-8">▼</span></button>
                     <div id="box-8" class="rxn-container">
@@ -161,21 +142,10 @@
                         <button class="rxn-btn" onclick="triggerTheaterBriefing(1, this)">Hydrohalogenation of Propene</button>
                     </div>
                 </div>
-
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(9)"><span>Chapter 9: Aromatic Hydrocarbons</span><span id="arr-9">▼</span></button><div id="box-9" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(10)"><span>Chapter 10: Alkyl Halides</span><span id="arr-10">▼</span></button><div id="box-10" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(11)"><span>Chapter 11: Alcohols & Phenols</span><span id="arr-11">▼</span></button><div id="box-11" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(12)"><span>Chapter 12: Aldehydes & Ketones</span><span id="arr-12">▼</span></button><div id="box-12" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(13)"><span>Chapter 13: Carboxylic Acids</span><span id="arr-13">▼</span></button><div id="box-13" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(14)"><span>Chapter 14: Macromolecules</span><span id="arr-14">▼</span></button><div id="box-14" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(15)"><span>Chapter 15: Chemical Industries</span><span id="arr-15">▼</span></button><div id="box-15" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(16)"><span>Chapter 16: Environmental Chemistry</span><span id="arr-16">▼</span></button><div id="box-16" class="rxn-container"></div></div>
             </div>
         </div>
 
         <div class="workspace-stage">
-            <button class="back-btn" onclick="goBack()">← BACK TO GATEWAY</button>
-
             <div id="briefingPopup" class="briefing-popup-overlay">
                 <div class="briefing-card">
                     <h2 id="popupTitle">Hydrogenation of Ethene</h2>
@@ -193,6 +163,7 @@
             </div>
 
             <h2 style="margin:0; font-size:1.4rem; font-weight:700;">Chamber Dashboard Panel</h2>
+
             <div class="layout-grid">
                 <div class="chamber-card">
                     <canvas id="sandbox" width="560" height="350"></canvas>
@@ -208,6 +179,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="analytics-deck">
                     <div class="stat-card" style="border-left:4px solid var(--fsc-blue)">
                         <div class="stat-label">Syllabus Core Equation Target</div>
@@ -228,145 +200,39 @@
     </div>
 
     <script>
-        // --- Existing Code ---
         const masterLibrary = [
-            { 
-                title: "Hydrogenation of Ethene", 
-                formula: "CH₂=CH₂ + H₂ → CH₃-CH₃", 
-                temp: 250, catalyst: "Finely divided Nickel (Ni)", byproduct: "None",
-                t1: "CH₂=CH₂", t2: "H₂", prod: "CH₃-CH₃", byp: null,
-                c1: "#ff65a3", c2: "#29b6f6", cProd: "#00e676", cByp: "#fff",
-                r1:21, r2:14,
-                p1: "<strong>Kinetic Factor:</strong> Unstable alkene pi-bonds break completely open under 250°C heat restrictions.",
-                p2: "<strong>Mechanism Path:</strong> Hydrogen pairs attach straight onto the carbon links, transitioning molecules into saturated Ethane alkanes cleanly."
-            },
-            { 
-                title: "Hydrohalogenation of Propene", 
-                formula: "CH₃-CH=CH₂ + HCl → CH₃-CH(Cl)-CH₃", 
-                temp: 100, catalyst: "No external catalyst needed", byproduct: "Trace 1-Chloropropane",
-                t1: "Propene", t2: "HCl", prod: "2-Chloropropane", byp: "1-Chloropropane",
-                c1: "#ff9100", c2: "#eecda3", cProd: "#00e676", cByp: "#e17055",
-                r1:24, r2:15,
-                p1: "<strong>Kinetic Factor:</strong> This electrophilic addition process requires a mild 100°C activation environment.",
-                p2: "<strong>Mechanism Path:</strong> Follows <strong>Markovnikov's Rule</strong>. The H⁺ attaches to the carbon with more hydrogens, creating a stable secondary carbocation for Cl⁻ targeting."
-            }
+            { title: "Hydrogenation of Ethene", formula: "CH₂=CH₂ + H₂ → CH₃-CH₃", temp: 250, catalyst: "Finely divided Nickel (Ni)", byproduct: "None", t1: "CH₂=CH₂", t2: "H₂", prod: "CH₃-CH₃", c1: "#ff65a3", c2: "#29b6f6", cProd: "#00e676", r1:21, r2:14, p1: "<strong>Kinetic Factor:</strong> Unstable alkene pi-bonds break completely open under 250°C heat.", p2: "<strong>Mechanism Path:</strong> Hydrogen pairs attach straight onto the carbon links.", type: "Exothermic" },
+            { title: "Hydrohalogenation of Propene", formula: "CH₃-CH=CH₂ + HCl → CH₃-CH(Cl)-CH₃", temp: 100, catalyst: "None", byproduct: "Trace 1-Chloropropane", t1: "Propene", t2: "HCl", prod: "2-Chloropropane", c1: "#ff9100", c2: "#eecda3", cProd: "#00e676", r1:24, r2:15, p1: "<strong>Kinetic Factor:</strong> Electrophilic addition requires a mild 100°C.", p2: "<strong>Mechanism Path:</strong> Markovnikov's Rule applied.", type: "Endothermic" }
         ];
 
-        let activeRxn = masterLibrary[0];
-        let temperature = 25; let particles = []; let draggedParticle = null;
-        let productCount = 0; let byproductCount = 0; let alertMsg = ""; let alertTimer = 0;
-        let catalystActive = false; let popupAnimFrame = 0;
+        let activeRxn = masterLibrary[0], temperature = 25, particles = [], draggedParticle = null, catalystActive = false;
 
-        const canvas = document.getElementById('sandbox'); const ctx = canvas.getContext('2d');
-        const tempSlider = document.getElementById('tempSlider'); const tempDisplay = document.getElementById('tempDisplay');
-
-        // Confetti Logic
-        const confCanvas = document.getElementById('confettiCanvas');
-        const confCtx = confCanvas.getContext('2d');
-        let confetti = [];
-
-        function goBack() {
-            document.getElementById('portalLayout').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('portalLayout').style.display = 'none';
-                document.getElementById('gatewayScreen').style.display = 'flex';
-                document.getElementById('gatewayScreen').style.opacity = '1';
-                document.getElementById('portalLayout').style.opacity = '1';
-                triggerConfetti();
-            }, 300);
-        }
-
-        function triggerConfetti() {
-            confetti = [];
-            for(let i=0; i<100; i++) {
-                confetti.push({x: Math.random()*window.innerWidth, y: -10, vy: 2+Math.random()*3, color: ['#00e676', '#29b6f6', '#ff9100'][Math.floor(Math.random()*3)]});
-            }
-            function animateConfetti() {
-                confCtx.clearRect(0,0, window.innerWidth, window.innerHeight);
-                confetti.forEach(c => {
-                    c.y += c.vy;
-                    confCtx.fillStyle = c.color;
-                    confCtx.fillRect(c.x, c.y, 8, 8);
-                });
-                if(confetti.some(c => c.y < window.innerHeight)) requestAnimationFrame(animateConfetti);
-            }
-            animateConfetti();
-        }
-
-        function playLabSound(freq, type, duration) {
-            try {
-                let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {}
-        }
+        const canvas = document.getElementById('sandbox'), ctx = canvas.getContext('2d');
+        const tempSlider = document.getElementById('tempSlider'), tempDisplay = document.getElementById('tempDisplay');
 
         function enterPortal(cohort) {
-            document.getElementById('gatewayScreen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('gatewayScreen').style.display = 'none';
-                document.getElementById('portalLayout').style.display = 'flex';
-                document.getElementById('sidebarCohortTitle').textContent = `FSc ${cohort} Chemistry`;
-                toggleChapter(8);
-            }, 300);
+            document.getElementById('gatewayScreen').style.display = 'none';
+            document.getElementById('portalLayout').style.display = 'flex';
+            toggleChapter(8);
         }
 
         function toggleChapter(id) {
             const container = document.getElementById(`box-${id}`);
-            if(!container) return;
-            const isVisible = container.style.display === 'flex';
-            document.querySelectorAll('.rxn-container').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('[id^="arr-"]').forEach(a => a.textContent = '▼');
-            if(!isVisible) { container.style.display = 'flex'; document.getElementById(`arr-${id}`).textContent = '▲'; }
+            container.style.display = container.style.display === 'flex' ? 'none' : 'flex';
         }
 
         function triggerTheaterBriefing(index, element) {
-            document.querySelectorAll('.rxn-btn').forEach(b => b.classList.remove('active'));
-            if(element) element.classList.add('active');
             activeRxn = masterLibrary[index];
-            productCount = 0; byproductCount = 0;
             document.getElementById('popupTitle').textContent = activeRxn.title;
             document.getElementById('popupEq').textContent = activeRxn.formula;
             document.getElementById('expPoint1').innerHTML = activeRxn.p1;
             document.getElementById('expPoint2').innerHTML = activeRxn.p2;
             document.getElementById('briefingPopup').style.display = 'flex';
-            runPopupTheatreAnimation();
-        }
-
-        function runPopupTheatreAnimation() {
-            cancelAnimationFrame(popupAnimFrame);
-            const aLeft = document.getElementById('atomLeft'); const aRight = document.getElementById('atomRight');
-            const container = document.getElementById('animBoxContainer');
-            aLeft.style.display = 'flex'; aRight.style.display = 'flex';
-            aLeft.style.backgroundColor = activeRxn.c1; aRight.style.backgroundColor = activeRxn.c2;
-            aLeft.textContent = activeRxn.t1; aRight.textContent = activeRxn.t2;
-            let progress = 0;
-            function animateStep() {
-                progress += 1.2;
-                let midPoint = container.clientWidth / 2 - 18;
-                aLeft.style.left = (30 + (midPoint - 30) * (progress / 100)) + 'px';
-                aRight.style.left = ((container.clientWidth - 60) - ((container.clientWidth - 60) - midPoint) * (progress / 100)) + 'px';
-                if (progress >= 100) {
-                    aLeft.style.backgroundColor = activeRxn.cProd; aLeft.textContent = activeRxn.prod;
-                    aRight.style.display = 'none';
-                    setTimeout(runPopupTheatreAnimation, 2500);
-                    return;
-                }
-                popupAnimFrame = requestAnimationFrame(animateStep);
-            }
-            animateStep();
         }
 
         function closeBriefingPopup() {
-            cancelAnimationFrame(popupAnimFrame);
             document.getElementById('briefingPopup').style.display = 'none';
             document.getElementById('textbookEq').textContent = activeRxn.formula;
-            document.getElementById('sideExplanationText').innerHTML = `<strong>Active Conditions:</strong><br>• Target Heat: ${activeRxn.temp}°C<br>• Agent: ${activeRxn.catalyst}<br><br>${activeRxn.p1}`;
             initChamber();
         }
 
@@ -376,67 +242,58 @@
         }
 
         class Atom {
-            constructor(x, y, label, color, type, isProduct = false) {
+            constructor(x, y, label, color, isProduct = false) {
                 this.x = x; this.y = y; this.label = label; this.color = color;
-                this.type = type; this.isProduct = isProduct;
+                this.isProduct = isProduct;
                 this.radius = isProduct ? 24 : 18;
                 this.vx = (Math.random() - 0.5) * 2; this.vy = (Math.random() - 0.5) * 2;
             }
             update() {
                 if(this === draggedParticle) return;
-                let speedFactor = catalystActive ? 2 : 1;
+                let speedFactor = (1 + (temperature - 25) * 0.01) * (catalystActive ? 2 : 1);
                 this.x += this.vx * speedFactor; this.y += this.vy * speedFactor;
-                if(this.x - this.radius < 0 || this.x + this.radius > canvas.width) this.vx *= -1;
-                if(this.y - this.radius < 0 || this.y + this.radius > canvas.height) this.vy *= -1;
+                if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
             }
             draw() {
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color; ctx.fill(); ctx.closePath();
-                ctx.fillStyle = "#000"; ctx.font = "bold 9px sans-serif"; ctx.textAlign="center";
-                ctx.fillText(this.label, this.x, this.y);
+                ctx.fillStyle = this.color; ctx.fill();
+                ctx.fillStyle = "#000"; ctx.textAlign = "center"; ctx.fillText(this.label, this.x, this.y);
             }
         }
 
-        function checkCollisions() {
-            for(let i = 0; i < particles.length; i++) {
-                for(let j = i + 1; j < particles.length; j++) {
-                    let p1 = particles[i]; let p2 = particles[j];
-                    if(p1.isProduct || p2.isProduct) continue;
-                    let dx = p2.x - p1.x; let dy = p2.y - p1.y;
-                    if(Math.sqrt(dx*dx + dy*dy) < p1.radius + p2.radius) {
-                        if(temperature >= activeRxn.temp) {
-                            let midX = (p1.x + p2.x) / 2; let midY = (p1.y + p2.y) / 2;
-                            particles.splice(j, 1); particles.splice(i, 1);
-                            particles.push(new Atom(midX, midY, activeRxn.prod, activeRxn.cProd, 'prod', true));
-                            productCount++;
-                            document.getElementById('mainYieldVal').textContent = `${productCount} Formed`;
-                        }
-                    }
-                }
+        // --- NEW ENERGY VISUAL LOGIC ---
+        function drawEnergyEffect(p) {
+            ctx.beginPath();
+            ctx.strokeStyle = (activeRxn.type === "Exothermic") ? "#ffeb3b" : "red";
+            ctx.lineWidth = 2;
+            for(let i=0; i<4; i++) {
+                let a = i * Math.PI/2;
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + Math.cos(a)*30, p.y + Math.sin(a)*30);
             }
+            ctx.stroke();
         }
 
         function initChamber() {
             particles = [];
-            for(let i=0; i<6; i++) particles.push(new Atom(50 + Math.random()*200, 50 + Math.random()*200, activeRxn.t1, activeRxn.c1, 't1'));
+            for(let i=0; i<6; i++) {
+                particles.push(new Atom(Math.random()*400, Math.random()*250, activeRxn.t1, activeRxn.c1));
+                particles.push(new Atom(Math.random()*400, Math.random()*250, activeRxn.t2, activeRxn.c2));
+            }
         }
 
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            particles.forEach(p => { if(Math.hypot(e.clientX - rect.left - p.x, e.clientY - rect.top - p.y) < p.radius) draggedParticle = p; });
-        });
-        window.addEventListener('mousemove', (e) => {
-            if(!draggedParticle) return;
-            const rect = canvas.getBoundingClientRect();
-            draggedParticle.x = e.clientX - rect.left; draggedParticle.y = e.clientY - rect.top;
-        });
-        window.addEventListener('mouseup', () => draggedParticle = null);
-        tempSlider.addEventListener('input', (e) => { temperature = e.target.value; tempDisplay.textContent = temperature + "°C"; });
+        tempSlider.oninput = (e) => { temperature = e.target.value; tempDisplay.textContent = temperature + "°C"; };
 
         function renderLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            checkCollisions();
-            particles.forEach(p => { p.update(); p.draw(); });
+            particles.forEach(p => {
+                p.update(); p.draw();
+                // Energy Visuals display when temperature is close to reaction requirements
+                if(Math.abs(temperature - activeRxn.temp) < 50) {
+                    drawEnergyEffect(p);
+                }
+            });
             requestAnimationFrame(renderLoop);
         }
         renderLoop();
