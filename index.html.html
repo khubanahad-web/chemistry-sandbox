@@ -1,483 +1,425 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FSc Interactive ChemStudio</title>
-    <style>
-        :root {
-            --navy-gate: #0a1128;
-            --studio-bg: #070b19;
-            --sidebar-bg: #0f1426;
-            --chapter-bg: #171f3b;
-            --card-bg: #131a33;
-            --border-color: #24315e;
-            --skin-btn: #eecda3;
-            --skin-btn-hover: #e2bc8a;
-            --fsc-green: #00e676;
-            --fsc-blue: #29b6f6;
-            --fsc-orange: #ff9100;
-            --text-main: #f0f4f8;
-            --text-muted: #8fa0c0;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Web App: Master Lab Sandbox</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0b0e14;
+            color: #c9d1d9;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
 
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: var(--studio-bg); color: var(--text-main);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            overflow: hidden; user-select: none;
-        }
+        h1 {
+            color: #ff7b72;
+            margin-bottom: 20px;
+        }
 
-        /* SCREEN 1: PORTAL GATEWAY */
-        .gateway-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--navy-gate); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 100;
-            transition: all 0.4s ease;
-        }
-        .gateway-title { font-size: 2.6rem; font-weight: 800; margin-bottom: 10px; color: #ffffff; text-align: center; }
-        .gateway-subtitle { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 40px; text-align: center; }
-        .gateway-btn-group { display: flex; gap: 25px; }
-        .skin-button {
-            background-color: var(--skin-btn); color: #2c1a04;
-            font-size: 1.15rem; font-weight: 700; padding: 15px 38px;
-            border: none; border-radius: 12px; cursor: pointer;
-            box-shadow: 0 6px 20px rgba(238, 205, 163, 0.15); transition: all 0.2s ease;
-        }
-        .skin-button:hover { background-color: var(--skin-btn-hover); transform: translateY(-2px); }
+        .app-layout {
+            display: flex;
+            gap: 20px;
+            max-width: 1100px;
+            width: 100%;
+        }
 
-        /* PORTAL SYSTEM APP LAYOUT */
-        .portal-layout { display: none; height: 100%; width: 100%; }
-        .fsc-sidebar { width: 350px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; height: 100%; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); }
-        .sidebar-header h1 { font-size: 1.25rem; margin: 0; font-weight: 800; color: var(--fsc-blue); }
-        .sidebar-header p { margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-muted); }
-        .chapter-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .chapter-accordion { background-color: var(--chapter-bg); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
-        .chapter-header {
-            width: 100%; padding: 12px 15px; background: none; border: none;
-            color: var(--text-main); font-size: 0.88rem; font-weight: 700;
-            text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-        }
-        .chapter-header:hover { background-color: rgba(255,255,255,0.02); }
-        .rxn-container { display: none; background-color: rgba(0,0,0,0.2); padding: 6px; flex-direction: column; gap: 4px; }
-        .rxn-btn {
-            background: none; border: none; border-radius: 6px; padding: 10px 12px;
-            color: var(--text-muted); font-size: 0.82rem; text-align: left; cursor: pointer; transition: all 0.2s;
-        }
-        .rxn-btn:hover { color: var(--text-main); background-color: rgba(255,255,255,0.04); }
-        .rxn-btn.active { color: #000; background-color: var(--skin-btn); font-weight: 700; }
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 16px;
+            padding: 20px;
+        }
 
-        .workspace-stage { flex: 1; display: flex; flex-direction: column; padding: 25px; overflow-y: auto; gap: 20px; position: relative; }
+        canvas {
+            background-color: #000000;
+            border: 2px solid #484f58;
+            border-radius: 8px;
+            cursor: grab;
+        }
 
-        /* THE ANIMATED THEATER OVERLAY BRIEFING SCREEN */
-        .briefing-popup-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(7, 11, 25, 0.98); z-index: 50;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            padding: 20px; box-sizing: border-box;
-        }
-        .briefing-card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; padding: 30px; max-width: 680px; width: 100%; text-align: center; }
-        .briefing-card h2 { margin: 0 0 5px 0; color: #ffffff; font-size: 1.6rem; }
-        .preview-eq-banner { font-size: 1.4rem; font-weight: 700; color: var(--fsc-blue); margin: 15px 0; font-family: monospace; }
-        
-        /* THE POP-UP LIVE CANVAS BOX FOR DEMO ANIMATION */
-        .preview-anim-box {
-            width: 100%; height: 120px; background-color: #040610; border: 1px solid var(--border-color);
-            border-radius: 12px; margin: 15px 0; position: relative; overflow: hidden;
-        }
-        .preview-atom {
-            position: absolute; width: 36px; height: 36px; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            color: #000; font-weight: bold; font-size: 0.75rem; top: 42px;
-        }
-        
-        .explanation-text-pane { text-align: left; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 15px; margin-bottom: 25px; }
-        .explanation-text-pane p { margin: 0 0 8px 0; font-size: 0.9rem; line-height: 1.45; color: var(--text-muted); }
-        .explanation-text-pane p strong { color: var(--fsc-orange); }
+        canvas:active {
+            cursor: grabbing;
+        }
 
-        /* ACTIVE INTERACTIVE WORKSPACE PANELS */
-        .layout-grid { display: flex; gap: 24px; align-items: flex-start; }
-        .chamber-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; }
-        canvas { background-color: #050710; border-radius: 10px; border: 1px solid var(--border-color); cursor: grab; }
-        canvas:active { cursor: grabbing; }
+        .sidebar {
+            flex: 1;
+            background-color: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 320px;
+        }
 
-        .slider-wrapper { width: 100%; margin-top: 15px; display: flex; flex-direction: column; gap: 12px; }
-        input[type="range"] { width: 100%; height: 6px; background: var(--border-color); border-radius: 4px; outline: none; accent-color: var(--fsc-orange); cursor: pointer; }
+        .sidebar h2 {
+            margin-top: 0;
+            color: #58a6ff;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+        }
 
-        /* INTEREST CAPTURING UTILITY CARDS */
-        .utility-toggle-card {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(41, 182, 246, 0.08); border: 1px solid rgba(41, 182, 246, 0.2);
-            padding: 10px 15px; border-radius: 8px; cursor: pointer; margin-top: 5px;
-        }
-        .toggle-switch-indicator { width: 40px; height: 20px; background: #252d4a; border-radius: 10px; position: relative; }
-        .toggle-switch-indicator::after { content: ''; position: absolute; width: 16px; height: 16px; background: #fff; border-radius: 50%; top: 2px; left: 2px; transition: 0.2s; }
-        .utility-toggle-card.active .toggle-switch-indicator { background: var(--fsc-green); }
-        .utility-toggle-card.active .toggle-switch-indicator::after { left: 22px; }
+        .info-box {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 12px;
+        }
 
-        .analytics-deck { flex: 1; display: flex; flex-direction: column; gap: 14px; min-width: 320px; }
-        .stat-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 18px; }
-        .stat-label { font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
-        .stat-val { font-size: 1.05rem; font-weight: 600; line-height: 1.4; }
-    </style>
+        .info-label {
+            font-size: 0.85rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 250px;
+            accent-color: #ff7b72;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
-    <div id="gatewayScreen" class="gateway-screen">
-        <h1 class="gateway-title">FSc Chemistry Learning Portal</h1>
-        <p class="gateway-subtitle">Select your curriculum cohort to begin laboratory simulations</p>
-        <div class="gateway-btn-group">
-            <button class="skin-button" onclick="enterPortal('Part-I')">FSc Part-I</button>
-            <button class="skin-button" onclick="enterPortal('Part-II')">FSc Part-II</button>
-        </div>
-    </div>
+    <h1>Interactive Chemical Reactor App</h1>
+    
+    <div class="app-layout">
+        <div class="left-panel">
+            <canvas id="sandbox" width="680" height="400"></canvas>
+            
+            <div class="controls">
+                <div class="slider-group">
+                    <label for="tempSlider">Thermal Energy: <span id="tempValue" style="color:#ff7b72;">25</span>°C</label>
+                    <input type="range" id="tempSlider" min="25" max="600" value="25">
+                </div>
+            </div>
+        </div>
 
-    <div id="portalLayout" class="portal-layout">
-        
-        <div class="fsc-sidebar">
-            <div class="sidebar-header">
-                <h1 id="sidebarCohortTitle">FSc Chemistry</h1>
-                <p>Course Syllabus Modules</p>
-            </div>
-            <div class="chapter-list">
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(1)"><span>Chapter 1: Periodic Classification</span><span id="arr-1">▼</span></button><div id="box-1" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(2)"><span>Chapter 2: s-Block Elements</span><span id="arr-2">▼</span></button><div id="box-2" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(7)"><span>Chapter 7: Fundamental Principles</span><span id="arr-7">▼</span></button><div id="box-7" class="rxn-container"></div></div>
-                
-                <div class="chapter-accordion">
-                    <button class="chapter-header" onclick="toggleChapter(8)"><span>Chapter 8: Aliphatic Hydrocarbons</span><span id="arr-8">▼</span></button>
-                    <div id="box-8" class="rxn-container">
-                        <button id="defaultBtn" class="rxn-btn" onclick="triggerTheaterBriefing(0, this)">Hydrogenation of Ethene</button>
-                        <button class="rxn-btn" onclick="triggerTheaterBriefing(1, this)">Hydrohalogenation of Propene</button>
-                    </div>
-                </div>
+        <div class="sidebar">
+            <h2>Reaction Blueprint</h2>
+            
+            <div class="info-box">
+                <div class="info-label">Lab Mechanics Profile</div>
+                <div class="info-value" id="labStatusText" style="color: #ff7b72;">Chamber too cold! Activation Energy not met.</div>
+            </div>
 
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(9)"><span>Chapter 9: Aromatic Hydrocarbons</span><span id="arr-9">▼</span></button><div id="box-9" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(10)"><span>Chapter 10: Alkyl Halides</span><span id="arr-10">▼</span></button><div id="box-10" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(11)"><span>Chapter 11: Alcohols & Phenols</span><span id="arr-11">▼</span></button><div id="box-11" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(12)"><span>Chapter 12: Aldehydes & Ketones</span><span id="arr-12">▼</span></button><div id="box-12" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(13)"><span>Chapter 13: Carboxylic Acids</span><span id="arr-13">▼</span></button><div id="box-13" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(14)"><span>Chapter 14: Macromolecules</span><span id="arr-14">▼</span></button><div id="box-14" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(15)"><span>Chapter 15: Chemical Industries</span><span id="arr-15">▼</span></button><div id="box-15" class="rxn-container"></div></div>
-                <div class="chapter-accordion"><button class="chapter-header" onclick="toggleChapter(16)"><span>Chapter 16: Environmental Chemistry</span><span id="arr-16">▼</span></button><div id="box-16" class="rxn-container"></div></div>
-            </div>
-        </div>
+            <div class="info-box">
+                <div class="info-label">Chemical Equation Label</div>
+                <div class="info-value" id="equationText" style="color: #58a6ff;">2Na(s) + Cl₂(g) → No Reaction</div>
+            </div>
 
-        <div class="workspace-stage">
-            
-            <div id="briefingPopup" class="briefing-popup-overlay">
-                <div class="briefing-card">
-                    <h2 id="popupTitle">Hydrogenation of Ethene</h2>
-                    <div id="popupEq" class="preview-eq-banner">CH₂=CH₂ + H₂ → CH₃-CH₃</div>
-                    
-                    <div class="preview-anim-box" id="animBoxContainer">
-                        <div id="atomLeft" class="preview-atom"></div>
-                        <div id="atomRight" class="preview-atom"></div>
-                    </div>
+            <div class="info-box">
+                <div class="info-label">Real-time Observations</div>
+                <div class="info-value" id="observationText" style="color: #e3b341;">Atoms collide but bounce away without a reaction below 150°C.</div>
+            </div>
 
-                    <div class="explanation-text-pane">
-                        <p id="expPoint1">...</p>
-                        <p id="expPoint2">...</p>
-                    </div>
+            <div class="info-box">
+                <div class="info-label">Product Status Dashboard</div>
+                <div class="info-value">Salt Created: <span id="saltCountDisplay" style="color: #56d364;">0</span> units</div>
+            </div>
+        </div>
+    </div>
 
-                    <button class="skin-button" style="padding:12px 36px; font-size:1rem; border-radius:8px;" onclick="closeBriefingPopup()">Understood, Enter Simulation</button>
-                </div>
-            </div>
+    <script>
+        const canvas = document.getElementById('sandbox');
+        const ctx = canvas.getContext('2d');
+        const tempSlider = document.getElementById('tempSlider');
+        const tempValue = document.getElementById('tempValue');
+        
+        const labStatusText = document.getElementById('labStatusText');
+        const equationText = document.getElementById('equationText');
+        const observationText = document.getElementById('observationText');
+        const saltCountDisplay = document.getElementById('saltCountDisplay');
 
-            <h2 style="margin:0; font-size:1.4rem; font-weight:700;">Chamber Dashboard Panel</h2>
+        let temperature = 25;
+        let particles = [];
+        let sparks = [];
+        let saltCount = 0;
+        let reactionTriggered = false;
+        let draggedParticle = null;
 
-            <div class="layout-grid">
-                <div class="chamber-card">
-                    <canvas id="sandbox" width="560" height="350"></canvas>
-                    <div class="slider-wrapper">
-                        <div style="font-size:0.85rem; font-weight:600; display:flex; justify-content:space-between;">
-                            <span style="color:var(--text-muted)">CHAMBER TEMPERATURE SLIDER</span>
-                            <span id="tempDisplay" style="color:var(--fsc-orange)">25°C</span>
-                        </div>
-                        <input type="range" id="tempSlider" min="25" max="600" value="25">
-                        
-                        <div id="catalystToggle" class="utility-toggle-card" onclick="toggleCatalystEngine()">
-                            <span style="font-size:0.82rem; font-weight:700; color:var(--text-main);">ACTIVATE EXPERIMENTAL METAL CATALYST MESH</span>
-                            <div class="toggle-switch-indicator"></div>
-                        </div>
-                    </div>
-                </div>
+        const getSpeedFactor = () => 1 + (temperature - 25) * 0.015;
 
-                <div class="analytics-deck">
-                    <div class="stat-card" style="border-left:4px solid var(--fsc-blue)">
-                        <div class="stat-label">Syllabus Core Equation Target</div>
-                        <div id="textbookEq" class="stat-val" style="color:var(--fsc-blue); font-family:monospace; font-size:1.15rem;">...</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Textbook Diagnostic Explanation</div>
-                        <div id="sideExplanationText" class="stat-val" style="font-size:0.88rem; font-weight:400; color:var(--text-muted); line-height:1.45;">Select a model to view mechanism notes...</div>
-                    </div>
-                    <div class="stat-card" style="border-left:4px solid var(--fsc-green)">
-                        <div class="stat-label">Simulation Yield Log Metrics</div>
-                        <div id="mainYieldVal" class="stat-val" style="color:var(--fsc-green)">0 Target Compounds Formed</div>
-                        <div id="byproductVal" class="stat-val" style="color:var(--fsc-orange); font-size:0.88rem; margin-top:4px;">0 Secondary Byproducts Released</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        // Glowing Exploding Sparks Class Structure
+        class Spark {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 2;
+                this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+            }
+            update() { this.x += this.vx; this.y += this.vy; this.alpha -= 0.04; }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffea70';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ffca3a';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
 
-    <script>
-        const masterLibrary = [
-            { 
-                title: "Hydrogenation of Ethene", 
-                formula: "CH₂=CH₂ + H₂ → CH₃-CH₃", 
-                temp: 250, catalyst: "Finely divided Nickel (Ni)", byproduct: "None",
-                t1: "CH₂=CH₂", t2: "H₂", prod: "CH₃-CH₃", byp: null,
-                c1: "#ff65a3", c2: "#29b6f6", cProd: "#00e676", cByp: "#fff",
-                r1:21, r2:14,
-                p1: "<strong>Kinetic Factor:</strong> Unstable alkene pi-bonds break completely open under 250°C heat restrictions.",
-                p2: "<strong>Mechanism Path:</strong> Hydrogen pairs attach straight onto the carbon links, transitioning molecules into saturated Ethane alkanes cleanly."
-            },
-            { 
-                title: "Hydrohalogenation of Propene", 
-                formula: "CH₃-CH=CH₂ + HCl → CH₃-CH(Cl)-CH₃", 
-                temp: 100, catalyst: "No external catalyst needed", byproduct: "Trace 1-Chloropropane",
-                t1: "Propene", t2: "HCl", prod: "2-Chloropropane", byp: "1-Chloropropane",
-                c1: "#ff9100", c2: "#eecda3", cProd: "#00e676", cByp: "#e17055",
-                r1:24, r2:15,
-                p1: "<strong>Kinetic Factor:</strong> This electrophilic addition process requires a mild 100°C activation environment.",
-                p2: "<strong>Mechanism Path:</strong> Follows <strong>Markovnikov's Rule</strong>. The H⁺ attaches to the carbon with more hydrogens, creating a stable secondary carbocation for Cl⁻ targeting."
-            }
-        ];
+        class Particle {
+            constructor(x, y, type) {
+                this.x = x; this.y = y;
+                this.type = type; 
+                this.bondedTo = null; 
+                this.isParent = false; 
+                this.flashFrames = 0;
+                
+                if (this.type === 'Na') {
+                    this.radius = 24;          
+                    this.color = '#ff65a3';     
+                    this.weightFactor = 0.3;   
+                } else {
+                    this.radius = 14;          
+                    this.color = '#38bdf8';     
+                    this.weightFactor = 1.8;   
+                }
 
-        let activeRxn = masterLibrary[0];
-        let temperature = 25; let particles = []; let draggedParticle = null;
-        let productCount = 0; let byproductCount = 0; let alertMsg = ""; let alertTimer = 0;
-        let catalystActive = false; let popupAnimFrame = 0;
+                const angle = Math.random() * Math.PI * 2;
+                this.baseSpeed = (0.2 + Math.random() * 0.4) * this.weightFactor;
+                this.vx = Math.cos(angle) * this.baseSpeed; 
+                this.vy = Math.sin(angle) * this.baseSpeed;
+            }
 
-        const canvas = document.getElementById('sandbox'); const ctx = canvas.getContext('2d');
-        const tempSlider = document.getElementById('tempSlider'); const tempDisplay = document.getElementById('tempDisplay');
+            update() {
+                if (this === draggedParticle) return; 
 
-        // BROWSER AUDIO ENGINE HANDLERS (SOUND FX SYNTHESIS SYSTEM)
-        let audioCtx = null;
-        function playLabSound(freq, type, duration) {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {}
-        }
+                const currentSpeed = getSpeedFactor();
+                
+                if (this.bondedTo && this.isParent) {
+                    this.x += this.vx * currentSpeed;
+                    this.y += this.vy * currentSpeed;
+                    
+                    this.bondedTo.x = this.x + Math.cos(this.bondAngle) * 38;
+                    this.bondedTo.y = this.y + Math.sin(this.bondAngle) * 38;
+                } else if (!this.bondedTo) {
+                    this.x += this.vx * currentSpeed;
+                    this.y += this.vy * currentSpeed;
+                }
+                this.handleWallCollisions();
+            }
 
-        function enterPortal(cohort) {
-            document.getElementById('gatewayScreen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('gatewayScreen').style.display = 'none';
-                document.getElementById('portalLayout').style.display = 'flex';
-                document.getElementById('sidebarCohortTitle').textContent = `FSc ${cohort} Chemistry`;
-                toggleChapter(8);
-                const dBtn = document.getElementById('defaultBtn');
-                if(dBtn) triggerTheaterBriefing(0, dBtn);
-            }, 300);
-        }
+            handleWallCollisions() {
+                let r = this.radius;
+                if (this.bondedTo) r = 35; 
 
-        function toggleChapter(id) {
-            const container = document.getElementById(`box-${id}`);
-            if(!container) return;
-            const isVisible = container.style.display === 'flex';
-            document.querySelectorAll('.rxn-container').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('[id^="arr-"]').forEach(a => a.textContent = '▼');
-            if(!isVisible) { container.style.display = 'flex'; document.getElementById(`arr-${id}`).textContent = '▲'; }
-        }
+                if (this.x - this.radius < 0) { this.x = this.radius; this.vx *= -1; if(this.bondedTo) this.bondedTo.vx *= -1; }
+                if (this.x + r > canvas.width) { this.x = canvas.width - r; this.vx *= -1; if(this.bondedTo) this.bondedTo.vx *= -1; }
+                if (this.y - this.radius < 0) { this.y = this.radius; this.vy *= -1; if(this.bondedTo) this.bondedTo.vy *= -1; }
+                if (this.y + r > canvas.height) { this.y = canvas.height - r; this.vy *= -1; if(this.bondedTo) this.bondedTo.vy *= -1; }
+            }
 
-        // POP-UP ANIMATION THEATER LAUNCH SEQUENCER
-        function triggerTheaterBriefing(index, element) {
-            document.querySelectorAll('.rxn-btn').forEach(b => b.classList.remove('active'));
-            if(element) element.classList.add('active');
-            
-            activeRxn = masterLibrary[index];
-            productCount = 0; byproductCount = 0;
-            
-            document.getElementById('popupTitle').textContent = activeRxn.title;
-            document.getElementById('popupEq').textContent = activeRxn.formula;
-            document.getElementById('expPoint1').innerHTML = activeRxn.p1;
-            document.getElementById('expPoint2').innerHTML = activeRxn.p2;
+            draw() {
+                ctx.beginPath(); 
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                
+                // INTENSE FLASH ANIMATION TRIGGER CONTROL MAPPED SAFELY HERE
+                if (this.flashFrames > 0) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowBlur = 35;
+                    ctx.shadowColor = '#ffea70';
+                    this.flashFrames--;
+                } else {
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 0; 
+                }
+                ctx.fill(); 
+                ctx.closePath();
+                ctx.shadowBlur = 0; 
 
-            document.getElementById('briefingPopup').style.display = 'flex';
-            runPopupTheatreAnimation();
-        }
+                // Draw bounding green chemical attachment link rings if bonded
+                if (this.bondedTo && this.flashFrames === 0) {
+                    ctx.strokeStyle = 'rgba(86, 211, 100, 0.6)';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
 
-        function runPopupTheatreAnimation() {
-            cancelAnimationFrame(popupAnimFrame);
-            const aLeft = document.getElementById('atomLeft'); const aRight = document.getElementById('atomRight');
-            const container = document.getElementById('animBoxContainer');
-            if(!aLeft || !aRight || !container) return;
+                // Elements keep internal identifiers Na or Cl always
+                ctx.fillStyle = '#ffffff'; 
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center'; 
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.type, this.x, this.y);
+            }
+        }
 
-            // Reset initial styling templates for atoms
-            aLeft.style.display = 'flex'; aRight.style.display = 'flex';
-            aLeft.style.backgroundColor = activeRxn.c1; aRight.style.backgroundColor = activeRxn.c2;
-            aLeft.textContent = activeRxn.t1; aRight.textContent = activeRxn.t2;
-            aLeft.style.borderRadius = '50%'; aRight.style.borderRadius = '50%';
-            
-            let progress = 0;
-            function animateStep() {
-                progress += 1.2;
-                let midPoint = container.clientWidth / 2 - 18;
-                let leftX = 30 + (midPoint - 30) * (progress / 100);
-                let rightX = (container.clientWidth - 60) - ((container.clientWidth - 60) - midPoint) * (progress / 100);
+        function checkReactions() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    let p1 = particles[i]; let p2 = particles[j];
 
-                aLeft.style.left = leftX + 'px'; aRight.style.left = rightX + 'px';
+                    if (((p1.type === 'Na' && p2.type === 'Cl') || (p1.type === 'Cl' && p2.type === 'Na')) && !p1.bondedTo && !p2.bondedTo) {
+                        let dx = p2.x - p1.x; let dy = p2.y - p1.y;
+                        let distance = Math.sqrt(dx * dx + dy * dy);
 
-                if (progress >= 100) {
-                    // Collision Merge Event! Transition shapes instantly to green output
-                    playLabSound(587.33, 'triangle', 0.25); // Fusion beep chord
-                    aLeft.style.backgroundColor = activeRxn.cProd;
-                    aLeft.textContent = activeRxn.prod; aLeft.style.left = (midPoint) + 'px';
-                    aLeft.style.borderRadius = '8px'; // Square lattice look
-                    aRight.style.display = 'none';
-                    
-                    setTimeout(runPopupTheatreAnimation, 2500); // Looping cycle interval
-                    return;
-                }
-                popupAnimFrame = requestAnimationFrame(animateStep);
-            }
-            animateStep();
-        }
+                        if (distance < (p1.radius + p2.radius + 4)) {
+                            
+                            // STRICT REACTION GATEWAY CONDITIONAL RULE
+                            if (temperature >= 150) {
+                                p1.bondedTo = p2; p2.bondedTo = p1;
+                                p1.isParent = true; 
+                                p2.isParent = false;
+                                
+                                // High power glowing parameters ignite dynamically right here
+                                p1.flashFrames = 25; p2.flashFrames = 25;
+                                
+                                p1.vx = (p1.vx + p2.vx) * 0.3;
+                                p1.vy = (p1.vy + p2.vy) * 0.3;
 
-        // SIDE LAYOUT TRANSLATOR LOCK DATA WIDGETS
-        function closeBriefingPopup() {
-            cancelAnimationFrame(popupAnimFrame);
-            document.getElementById('briefingPopup').style.display = 'none';
-            
-            document.getElementById('textbookEq').textContent = activeRxn.formula;
-            document.getElementById('sideExplanationText').innerHTML = `
-                <strong>Active Conditions:</strong><br>
-                • Target Heat Limit: ${activeRxn.temp}°C<br>
-                • Required Agent: ${activeRxn.catalyst}<br>
-                • System Waste Vectors: ${activeRxn.byproduct}<br><br>
-                ${activeRxn.p1}<br><br>${activeRxn.p2}
-            `;
-            initChamber();
-        }
+                                p1.bondAngle = Math.atan2(dy, dx);
+                                p2.bondAngle = Math.atan2(-dy, -dx);
+                                
+                                // Shoot massive visual spark bursts across collision coordinates
+                                for (let k = 0; k < 25; k++) {
+                                    sparks.push(new Spark((p1.x + p2.x)/2, (p1.y + p2.y)/2));
+                                }
 
-        function toggleCatalystEngine() {
-            catalystActive = !catalystActive;
-            const card = document.getElementById('catalystToggle');
-            if(catalystActive) card.classList.add('active'); else card.classList.remove('active');
-        }
+                                saltCount++;
+                                reactionTriggered = true;
+                                updateSidebarText();
+                            } else {
+                                // If temperature is below 150, push them away completely!
+                                if (p1 === draggedParticle) {
+                                    p2.x += dx * 0.2; p2.y += dy * 0.2;
+                                } else if (p2 === draggedParticle) {
+                                    p1.x -= dx * 0.2; p1.y -= dy * 0.2;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-        class Atom {
-            constructor(x, y, label, color, type, isProduct = false) {
-                this.x = x; this.y = y; this.label = label; this.color = color;
-                this.type = type; this.isProduct = isProduct;
-                this.radius = isProduct ? 24 : (label.length > 4 ? 21 : 15);
-                this.vx = (Math.random() - 0.5) * 1.5; this.vy = (Math.random() - 0.5) * 1.5;
-            }
-            update() {
-                if(this === draggedParticle) return;
-                let multiplier = catalystActive ? 2.2 : 1.0;
-                let speedFactor = (1 + (temperature - 25) * 0.01) * multiplier;
-                this.x += this.vx * speedFactor; this.y += this.vy * speedFactor;
+        function updateSidebarText() {
+            saltCountDisplay.textContent = saltCount;
+            if (reactionTriggered) {
+                equationText.innerHTML = "2Na(s) + Cl₂(g) &rarr; 2NaCl(s) <span style='color:#56d364;'>(SYNTHESIS)</span>";
+                observationText.textContent = "Exothermic synthesis activated successfully! Atoms flashed with energy and locked together as stable NaCl salt molecules.";
+                observationText.style.color = "#56d364";
+            }
+        }
 
-                if(this.x - this.radius < 0 || this.x + this.radius > canvas.width) this.vx *= -1;
-                if(this.y - this.radius < 0 || this.y + this.radius > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color; ctx.shadowBlur = this.isProduct ? 16 : 8; ctx.shadowColor = this.color;
-                ctx.fill(); ctx.closePath(); ctx.shadowBlur = 0;
-                ctx.fillStyle = "#000000"; ctx.font = "bold 9px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
-                ctx.fillText(this.label, this.x, this.y);
-            }
-        }
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+        }
 
-        function checkCollisions() {
-            for(let i = 0; i < particles.length; i++) {
-                for(let j = i + 1; j < particles.length; j++) {
-                    let p1 = particles[i]; let p2 = particles[j];
-                    if(p1.isProduct || p2.isProduct) continue;
+        canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(e);
+            for (let p of particles) {
+                let dx = pos.x - p.x; let dy = pos.y - p.y;
+                if (Math.sqrt(dx * dx + dy * dy) < p.radius + 5) {
+                    draggedParticle = p;
+                    break;
+                }
+            }
+        });
 
-                    let dx = p2.x - p1.x; let dy = p2.y - p1.y;
-                    let dist = Math.sqrt(dx*dx + dy*dy);
+        canvas.addEventListener('mousemove', (e) => {
+            if (!draggedParticle) return;
+            const pos = getMousePos(e);
+            
+            draggedParticle.x = pos.x;
+            draggedParticle.y = pos.y;
 
-                    if(dist < p1.radius + p2.radius) {
-                        if(p1.type !== p2.type) {
-                            if(temperature >= activeRxn.temp) {
-                                playLabSound(440, 'sine', 0.2); // Synthesize reaction sound
-                                let midX = (p1.x + p2.x) / 2; let midY = (p1.y + p2.y) / 2;
-                                
-                                particles.splice(j, 1); particles.splice(i, 1);
-                                particles.push(new Atom(midX, midY, activeRxn.prod, activeRxn.cProd, 'product', true));
-                                productCount++;
-                                document.getElementById('mainYieldVal').textContent = `${productCount} ${activeRxn.prod} Formed!`;
+            if (draggedParticle.bondedTo) {
+                if (draggedParticle.isParent) {
+                    draggedParticle.bondedTo.x = pos.x + Math.cos(draggedParticle.bondAngle) * 38;
+                    draggedParticle.bondedTo.y = pos.y + Math.sin(draggedParticle.bondAngle) * 38;
+                } else {
+                    draggedParticle.bondedTo.x = pos.x + Math.cos(draggedParticle.bondedTo.bondAngle) * -38;
+                    draggedParticle.bondedTo.y = pos.y + Math.sin(draggedParticle.bondedTo.bondAngle) * -38;
+                }
+            }
+        });
 
-                                if(activeRxn.byp) {
-                                    particles.push(new Atom(midX + 22, midY + 22, activeRxn.byp, activeRxn.cByp, 'byproduct', true));
-                                    byproductCount++;
-                                    document.getElementById('byproductVal').textContent = `${byproductCount} ${activeRxn.byp} Released`;
-                                }
-                                return;
-                            } else {
-                                playLabSound(120, 'sawtooth', 0.1); // Low kinetic failure buzz
-                                alertMsg = `Too Cold! Target Limit: ${activeRxn.temp}°C`; alertTimer = 45;
-                                p1.vx *= -1; p1.vy *= -1; p2.vx *= -1; p2.vy *= -1;
-                            }
-                        } else {
-                            p1.vx *= -1; p1.vy *= -1; p2.vx *= -1; p2.vy *= -1;
-                        }
-                    }
-                }
-            }
-        }
+        window.addEventListener('mouseup', () => { draggedParticle = null; });
 
-        // RE-ALIGNED PHYSICS DRAGGING HANDLERS
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect(); let mx = e.clientX - rect.left; let my = e.clientY - rect.top;
-            for(let p of particles) {
-                let d = Math.sqrt((mx-p.x)*(mx-p.x) + (my-p.y)*(my-p.y));
-                if(d < p.radius + 12) { draggedParticle = p; break; }
-            }
-        });
-        canvas.addEventListener('mousemove', (e) => {
-            if(!draggedParticle) return;
-            const rect = canvas.getBoundingClientRect(); draggedParticle.x = e.clientX - rect.left; draggedParticle.y = e.clientY - rect.top;
-        });
-        window.addEventListener('mouseup', () => { draggedParticle = null; });
+        tempSlider.addEventListener('input', (e) => {
+            temperature = parseInt(e.target.value);
+            tempValue.textContent = temperature;
+            
+            if (temperature < 150) {
+                labStatusText.textContent = "Chamber too cold! Activation Energy not met.";
+                labStatusText.style.color = "#ff7b72";
+                if(!reactionTriggered) {
+                    observationText.textContent = "Atoms collide but bounce away without a reaction below 150°C.";
+                    observationText.style.color = "#e3b341";
+                }
+            } else {
+                labStatusText.textContent = "Optimal Temperature Achieved! Ready to React.";
+                labStatusText.style.color = "#58a6ff";
+                if(!reactionTriggered) {
+                    observationText.textContent = "Chamber hot enough! Smash atoms together or let them collide naturally to ignite.";
+                    observationText.style.color = "#58a6ff";
+                }
+            }
+        });
 
-        tempSlider.addEventListener('input', (e) => {
-            temperature = parseInt(e.target.value); tempDisplay.textContent = temperature + "°C";
-        });
+        function init() {
+            particles = []; sparks = []; saltCount = 0; reactionTriggered = false;
+            equationText.textContent = "2Na(s) + Cl₂(g) → No Reaction";
+            observationText.textContent = "Atoms collide but bounce away without a reaction below 150°C.";
+            observationText.style.color = "#e3b341";
+            saltCountDisplay.textContent = "0";
 
-        function initChamber() {
-            particles = [];
-            for(let i=0; i<5; i++) {
-                particles.push(new Atom(40 + Math.random()*200, 40 + Math.random()*250, activeRxn.t1, activeRxn.c1, 't1'));
-                particles.push(new Atom(320 + Math.random()*200, 40 + Math.random()*250, activeRxn.t2, activeRxn.c2, 't2'));
-            }
-        }
+            for (let i = 0; i < 10; i++) {
+                particles.push(new Particle(Math.random() * 500 + 50, Math.random() * 280 + 50, 'Na'));
+                particles.push(new Particle(Math.random() * 500 + 50, Math.random() * 280 + 50, 'Cl'));
+            }
+        }
 
-        window.onload = function() {
-            function renderLoop() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // Draw catalyst network wire lines if active
-                if(catalystActive) {
-                    ctx.strokeStyle = 'rgba(41, 182, 246, 0.05)'; ctx.lineWidth = 1;
-                    for(let x=0; x<canvas.width; x+=30) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
-                }
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            checkReactions();
+            sparks = sparks.filter(s => s.alpha > 0);
+            sparks.forEach(s => { s.update(); s.draw(); });
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
 
-                checkCollisions();
-                particles.forEach(p => { p.update(); p.draw(); });
-
-                if(alertTimer > 0) {
-                    ctx.fillStyle = "var(--fsc-orange)"; ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center";
-                    ctx.fillText(alertMsg, canvas.width/2, 35); alertTimer--;
-                }
-                requestAnimationFrame(renderLoop);
-            }
-            renderLoop();
-        };
-    </script>
+        init();
+        animate();
+    </script>
 </body>
 </html>
