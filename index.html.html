@@ -3,37 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChemStudio Workspace</title>
+    <title>FSc Part-II Chemistry Studio</title>
     <style>
-        /* Canva-Inspired Sleek Studio Palette */
         :root {
-            --studio-bg: #0f111a;
-            --sidebar-bg: #181924;
-            --card-bg: #1f202e;
-            --border-color: #2e3046;
-            --canva-purple: #8b3dff;
-            --canva-cyan: #00c4cc;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --success: #10b981;
-            --warning: #f59e0b;
+            --studio-bg: #0b0d17;
+            --sidebar-bg: #111422;
+            --chapter-bg: #191e32;
+            --card-bg: #161b2e;
+            --border-color: #252d4a;
+            --fsc-green: #00e676;
+            --fsc-blue: #29b6f6;
+            --fsc-orange: #ff9100;
+            --text-main: #f0f4f8;
+            --text-muted: #8fa0c0;
         }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--studio-bg);
             color: var(--text-main);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
-            height: 100vh;
-            overflow: hidden;
+            height: 100vh; overflow: hidden;
             user-select: none;
         }
 
-        /* LEFT SIDEBAR: CANVA-STYLE NAVIGATION */
-        .canva-sidebar {
-            width: 320px;
+        /* 12-CHAPTER ACCORDION SIDEBAR */
+        .fsc-sidebar {
+            width: 340px;
             background-color: var(--sidebar-bg);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -42,422 +39,74 @@
         }
 
         .sidebar-header {
-            padding: 24px;
+            padding: 20px;
             border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(to bottom, rgba(0,230,118,0.05), transparent);
         }
 
         .sidebar-header h1 {
-            font-size: 1.4rem;
-            margin: 0;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--canva-purple), var(--canva-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.3rem; margin: 0; font-weight: 800; color: var(--fsc-green);
+            letter-spacing: 0.5px;
         }
 
         .sidebar-header p {
-            margin: 5px 0 0 0;
-            font-size: 0.8rem;
-            color: var(--text-muted);
+            margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-muted);
         }
 
-        .reaction-menu-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .chapter-list {
+            flex: 1; overflow-y: auto; padding: 12px;
+            display: flex; flex-direction: column; gap: 8px;
         }
 
-        .menu-heading {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin: 10px 0 5px 4px;
+        .chapter-accordion {
+            background-color: var(--chapter-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px; overflow: hidden;
         }
 
-        .reaction-tab {
-            background-color: transparent;
-            border: 1px solid transparent;
-            border-radius: 10px;
-            padding: 12px 14px;
-            color: var(--text-main);
-            text-align: left;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            transition: all 0.2s ease;
+        .chapter-header {
+            width: 100%; padding: 12px 15px;
+            background: none; border: none;
+            color: var(--text-main); font-size: 0.88rem; font-weight: 700;
+            text-align: left; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
-        .reaction-tab:hover {
-            background-color: rgba(255, 255, 255, 0.04);
+        .chapter-header:hover { background-color: rgba(255,255,255,0.02); }
+
+        .rxn-container {
+            display: none; background-color: rgba(0,0,0,0.2);
+            padding: 6px; flex-direction: column; gap: 4px;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        .reaction-tab.active {
-            background-color: rgba(139, 61, 255, 0.15);
-            border-color: var(--canva-purple);
+        .rxn-btn {
+            background: none; border: none; border-radius: 6px;
+            padding: 10px 12px; color: var(--text-muted);
+            font-size: 0.82rem; text-align: left; cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .reaction-tab span {
-            font-size: 0.75rem;
-            color: var(--text-muted);
+        .rxn-btn:hover { color: var(--text-main); background-color: rgba(255,255,255,0.04); }
+        .rxn-btn.active { color: #ffffff; background-color: var(--fsc-green); font-weight: 600; }
+
+        /* MAIN WORKSPACE INTERFACE */
+        .workspace-stage {
+            flex: 1; display: flex; flex-direction: column;
+            padding: 25px; overflow-y: auto; gap: 20px;
+            position: relative;
         }
 
-        /* RIGHT PANEL: MAIN APP INTERFACE STAGE */
-        .main-workspace {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 30px;
-            overflow-y: auto;
-            gap: 24px;
-        }
+        .layout-grid { display: flex; gap: 24px; align-items: flex-start; }
 
-        .workspace-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .active-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .layout-grid {
-            display: flex;
-            gap: 24px;
-            align-items: flex-start;
-        }
-
-        .canvas-container {
+        .chamber-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 16px; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            position: relative;
         }
 
-        canvas {
-            background-color: #090a10;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            cursor: grab;
-        }
+        canvas { background-color: #070911; border-radius: 10px; border: 1px solid var(--border-color); }
 
-        canvas:active { cursor: grabbing; }
-
-        .slider-panel {
-            width: 100%;
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            background: var(--border-color);
-            border-radius: 4px;
-            outline: none;
-            accent-color: var(--canva-purple);
-            cursor: pointer;
-        }
-
-        /* DATA CARDS PANEL */
-        .analytics-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            min-width: 300px;
-        }
-
-        .info-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 16px;
-        }
-
-        .card-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-
-        .card-value {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="canva-sidebar">
-        <div class="sidebar-header">
-            <h1>ChemStudio Simulation</h1>
-            <p>Interactive Laboratory Environment</p>
-        </div>
-        <div class="reaction-menu-list">
-            <div class="menu-heading">Synthesis Reactions</div>
-            <button class="reaction-tab active" onclick="switchReaction(0, this)">
-                Create Salt (NaCl)
-                <span>2Na + Cl₂ → 2NaCl</span>
-            </button>
-            <button class="reaction-tab" onclick="switchReaction(1, this)">
-                Water Synthesis (H₂O)
-                <span>2H₂ + O₂ → 2H₂O</span>
-            </button>
-            <button class="reaction-tab" onclick="switchReaction(2, this)">
-                Ammonia Production
-                <span>N₂ + 3H₂ → 2NH₃</span>
-            </button>
-            <button class="reaction-tab" onclick="switchReaction(3, this)">
-                Magnesium Oxide
-                <span>2Mg + O₂ → 2MgO</span>
-            </button>
-
-            <div class="menu-heading">Displacement & Decomposition</div>
-            <button class="reaction-tab" onclick="switchReaction(4, this)">
-                Carbon Dioxide
-                <span>C + O₂ → CO₂</span>
-            </button>
-            <button class="reaction-tab" onclick="switchReaction(5, this)">
-                Iron Oxide (Rust)
-                <span>4Fe + 3O₂ → 2Fe₂O₃</span>
-            </button>
-            <button class="reaction-tab" onclick="switchReaction(6, this)">
-                Hydrochloric Acid Formation
-                <span>H₂ + Cl₂ → 2HCl</span>
-            </button>
-            <button class="reaction-tab" onclick="switchReaction(7, this)">
-                Sulfur Dioxide
-                <span>S + O₂ → SO₂</span>
-            </button>
-            <button class="reaction-tab" onclick="switchReaction(8, this)">
-                Copper Oxide Formation
-                <span>2Cu + O₂ → 2CuO</span>
-            </button>
-            <button class="reaction-tab" onclick="switchReaction(9, this)">
-                Phosphorus Pentoxide
-                <span>4P + 5O₂ → 2P₂O₅</span>
-            </button>
-        </div>
-    </div>
-
-    <div class="main-workspace">
-        <div class="workspace-header">
-            <h2 id="reactionTitle" class="active-title">Synthesis of Sodium Chloride</h2>
-        </div>
-
-        <div class="layout-grid">
-            <div class="canvas-container">
-                <canvas id="sandbox" width="600" height="380"></canvas>
-                <div class="slider-panel">
-                    <div style="font-size: 0.9rem; font-weight: 600; display:flex; justify-content:space-between;">
-                        <span style="color:var(--text-muted)">REACTOR TEMPERATURE</span>
-                        <span id="tempDisplay" style="color: var(--canva-cyan)">25°C</span>
-                    </div>
-                    <input type="range" id="tempSlider" min="25" max="600" value="25">
-                </div>
-            </div>
-
-            <div class="analytics-panel">
-                <div class="info-card">
-                    <div class="card-label">Equation Formula</div>
-                    <div id="formulaCard" class="card-value" style="color:var(--canva-cyan)">2Na(s) + Cl₂(g) → Inactive</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-label">Activation Rules</div>
-                    <div id="ruleCard" class="card-value" style="font-size:0.95rem; font-weight:400;">Requires 150°C to initiate electron configuration modifications.</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-label">Microscopic Observations</div>
-                    <div id="obsCard" class="card-value" style="font-size:0.95rem; color:var(--text-muted); font-weight:400;">Chamber cold. Moving elements lack matching impact velocities.</div>
-                </div>
-                <div class="info-card" style="border-left: 4px solid var(--success)">
-                    <div class="card-label">Compounds Synthesized</div>
-                    <div id="countCard" class="card-value" style="color:var(--success)">0 elements produced</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // REACTION DATA MATRIX DEFINITIONS
-        const reactionLibrary = [
-            { title: "Synthesis of Sodium Chloride", t1: "Na", t2: "Cl", f1: "#ff65a3", f2: "#38bdf8", r1: 20, r2: 12, thresh: 150, balanced: "2Na(s) + Cl₂(g) → 2NaCl(s)", rule: "Requires 150°C. Heavy solid sodium blocks collided by light chlorine particles.", output: "NaCl" },
-            { title: "Synthesis of Water Molecule", t1: "H", t2: "O", f1: "#f3f4f6", f2: "#ef4444", r1: 10, r2: 18, thresh: 200, balanced: "2H₂(g) + O₂(g) → 2H₂O(g)", rule: "Requires 200°C. Rapid hydrogen atoms bond into gaseous oxygen parameters.", output: "H₂O" },
-            { title: "Haber Process Ammonia Production", t1: "N", t2: "H", f1: "#3b82f6", f2: "#f3f4f6", r1: 16, r2: 10, thresh: 350, balanced: "N₂(g) + 3H₂(g) → 2NH₃(g)", rule: "Requires High Thermal Threshold: 350°C. Simulates strong covalent nitrogen split.", output: "NH₃" },
-            { title: "Magnesium Combustion Environment", t1: "Mg", t2: "O", f1: "#a1a1aa", f2: "#ef4444", r1: 22, r2: 18, thresh: 120, balanced: "2Mg(s) + O₂(g) → 2MgO(s)", rule: "Requires 120°C. High energy output generation occurs when structural bonding triggers.", output: "MgO" },
-            { title: "Carbon Oxidation Simulation", t1: "C", t2: "O", f1: "#4b5563", f2: "#ef4444", r1: 15, r2: 18, thresh: 220, balanced: "C(s) + O₂(g) → CO₂(g)", rule: "Requires 220°C to ignite dark structural carbon molecules into oxygen.", output: "CO₂" },
-            { title: "Iron Oxidation Matrix (Rusting)", t1: "Fe", t2: "O", f1: "#b45309", f2: "#ef4444", r1: 24, r2: 18, thresh: 80, balanced: "4Fe(s) + 3O₂(g) → 2Fe₂O₃(s)", rule: "Low Activation Energy: 80°C. Rapid decay configuration parameters become visible.", output: "Fe₂O₃" },
-            { title: "Hydrochloric Synthesis Chamber", t1: "H", t2: "Cl", f1: "#f3f4f6", f2: "#38bdf8", r1: 10, r2: 12, thresh: 100, balanced: "H₂(g) + Cl₂(g) → 2HCl(g)", rule: "Requires 100°C. Photochemical activation simulation environment.", output: "HCl" },
-            { title: "Sulfur Dioxide Generation", t1: "S", t2: "O", f1: "#eab308", f2: "#ef4444", r1: 18, r2: 18, thresh: 250, balanced: "S(s) + O₂(g) → SO₂(g)", rule: "Requires 250°C. Sulfur molecular grids dissolve into covalent bounds.", output: "SO₂" },
-            { title: "Copper Oxidation Sandbox", t1: "Cu", t2: "O", f1: "#ea580c", f2: "#ef4444", r1: 23, r2: 18, thresh: 300, balanced: "2Cu(s) + O₂(g) → 2CuO(s)", rule: "Requires 300°C. High heat forces shiny metal surfaces to oxidize completely.", output: "CuO" },
-            { title: "Phosphorus Combustion Matrix", t1: "P", t2: "O", f1: "#10b981", f2: "#ef4444", r1: 19, r2: 18, thresh: 180, balanced: "4P(s) + 5O₂(g) → 2P₂O₅(s)", rule: "Requires 180°C. Fast chain cross-linking produces dense chemical output.", output: "P₂O₅" }
-        ];
-
-        let currentActiveID = 0;
-        const canvas = document.getElementById('sandbox');
-        const ctx = canvas.getContext('2d');
-        const tempSlider = document.getElementById('tempSlider');
-        const tempDisplay = document.getElementById('tempDisplay');
-
-        let temperature = 25;
-        let particles = [];
-        let count = 0;
-        let activeReaction = reactionLibrary[0];
-        let draggedParticle = null;
-
-        function drawGrid() {
-            ctx.strokeStyle = 'rgba(46, 48, 70, 0.25)'; ctx.lineWidth = 1;
-            for(let x=0; x<canvas.width; x+=20){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
-            for(let y=0; y<canvas.height; y+=20){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
-        }
-
-        class Particle {
-            constructor(x, y, type) {
-                this.x = x; this.y = y; this.type = type;
-                this.bondedTo = null; this.isParent = false;
-                this.radius = type === activeReaction.t1 ? activeReaction.r1 : activeReaction.r2;
-                this.color = type === activeReaction.t1 ? activeReaction.f1 : activeReaction.f2;
-                
-                const angle = Math.random() * Math.PI * 2;
-                this.speed = 0.4 + Math.random() * 0.6;
-                this.vx = Math.cos(angle) * this.speed; this.vy = Math.sin(angle) * this.speed;
-            }
-            update() {
-                if (this === draggedParticle) return;
-                let currentSpeed = 1 + (temperature - 25) * 0.015;
-                
-                if (this.bondedTo && this.isParent) {
-                    this.x += this.vx * currentSpeed; this.y += this.vy * currentSpeed;
-                    this.bondedTo.x = this.x + Math.cos(this.bondAngle) * 25;
-                    this.bondedTo.y = this.y + Math.sin(this.bondAngle) * 25;
-                } else if (!this.bondedTo) {
-                    this.x += this.vx * currentSpeed; this.y += this.vy * currentSpeed;
-                }
-                
-                let r = this.radius;
-                if (this.x - r < 0) { this.x = r; this.vx *= -1; if(this.bondedTo) this.bondedTo.vx *= -1; }
-                if (this.x + r > canvas.width) { this.x = canvas.width - r; this.vx *= -1; if(this.bondedTo) this.bondedTo.vx *= -1; }
-                if (this.y - r < 0) { this.y = r; this.vy *= -1; if(this.bondedTo) this.bondedTo.vy *= -1; }
-                if (this.y + r > canvas.height) { this.y = canvas.height - r; this.vy *= -1; if(this.bondedTo) this.bondedTo.vy *= -1; }
-            }
-            draw() {
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color; ctx.fill();
-                if(this.bondedTo) { ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2; ctx.stroke(); }
-                ctx.fillStyle = "#000000"; ctx.font = "bold 10px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
-                ctx.fillText(this.type, this.x, this.y);
-            }
-        }
-
-        function checkCollisions() {
-            for(let i=0; i<particles.length; i++) {
-                for(let j=i+1; j<particles.length; j++) {
-                    let p1 = particles[i]; let p2 = particles[j];
-                    if(((p1.type===activeReaction.t1 && p2.type===activeReaction.t2) || (p1.type===activeReaction.t2 && p2.type===activeReaction.t1)) && !p1.bondedTo && !p2.bondedTo) {
-                        let dx = p2.x - p1.x; let dy = p2.y - p1.y;
-                        let dist = Math.sqrt(dx*dx + dy*dy);
-                        if(dist < (p1.radius + p2.radius + 5)) {
-                            if(temperature >= activeReaction.thresh) {
-                                p1.bondedTo = p2; p2.bondedTo = p1; p1.isParent = true;
-                                p1.bondAngle = Math.atan2(dy, dx);
-                                count++;
-                                document.getElementById('countCard').textContent = `${count} units of ${activeReaction.output} created`;
-                                document.getElementById('formulaCard').textContent = activeReaction.balanced;
-                                document.getElementById('obsCard').textContent = "Activation energy milestone crossed! Stable molecular pairing locked successfully.";
-                                document.getElementById('obsCard').style.color = "var(--success)";
-                            } else {
-                                if(p1 === draggedParticle) { p2.x += dx*0.1; p2.y += dy*0.1; }
-                                else if(p2 === draggedParticle) { p1.x -= dx*0.1; p1.y -= dy*0.1; }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // DRAG AND DROP HANDLERS (FIXED DISTANCE CHECK FORMULA)
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
-            for(let p of particles) {
-                let dx = mx - p.x; let dy = my - p.y;
-                if(Math.sqrt(dx*dx + dy*dy) < p.radius + 10) { draggedParticle = p; break; }
-            }
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            if(!draggedParticle) return;
-            const rect = canvas.getBoundingClientRect();
-            draggedParticle.x = e.clientX - rect.left; draggedParticle.y = e.clientY - rect.top;
-            if (draggedParticle.bondedTo) {
-                let target = draggedParticle.bondedTo;
-                let angle = draggedParticle.isParent ? draggedParticle.bondAngle : target.bondAngle + Math.PI;
-                target.x = draggedParticle.x + Math.cos(angle) * 25;
-                target.y = draggedParticle.y + Math.sin(angle) * 25;
-            }
-        });
-        window.addEventListener('mouseup', () => { draggedParticle = null; });
-
-        // TAB SWITCHER HUB ENGINE
-        function switchReaction(index, buttonElement) {
-            currentActiveID = index;
-            activeReaction = reactionLibrary[index];
-            count = 0;
-            
-            document.querySelectorAll('.reaction-tab').forEach(t => t.classList.remove('active'));
-            buttonElement.classList.add('active');
-            
-            document.getElementById('reactionTitle').textContent = activeReaction.title;
-            document.getElementById('formulaCard').textContent = `${activeReaction.t1} + ${activeReaction.t2} → Inactive`;
-            document.getElementById('ruleCard').textContent = activeReaction.rule;
-            document.getElementById('obsCard').textContent = "Chamber reset. Particles lack sufficient kinetic energy thresholds.";
-            document.getElementById('obsCard').style.color = "var(--text-muted)";
-            document.getElementById('countCard').textContent = "0 elements produced";
-            
-            init();
-        }
-
-        tempSlider.addEventListener('input', (e) => {
-            temperature = parseInt(e.target.value);
-            tempDisplay.textContent = `${temperature}°C`;
-        });
-
-        function init() {
-            particles = [];
-            for(let i=0; i<12; i++) {
-                particles.push(new Particle(Math.random()*500+40, Math.random()*300+40, activeReaction.t1));
-                particles.push(new Particle(Math.random()*500+40, Math.random()*300+40, activeReaction.t2));
-            }
-        }
-
-        function mainLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawGrid(); checkCollisions();
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(mainLoop);
-        }
-
-        init(); mainLoop();
-    </script>
-</body>
-</html>
+        .slider-wrapper { width: 100%; margin-top: 20px; }
