@@ -6,32 +6,30 @@
     <style>
         :root {
             --navy-gate: #0a1128; --studio-bg: #070b19; --sidebar-bg: #0f1426;
-            --chapter-bg: #171f3b; --card-bg: #131a33; --border-color: #24315e;
-            --skin-btn: #eecda3; --text-main: #f0f4f8; --text-muted: #8fa0c0;
+            --card-bg: #131a33; --border-color: #24315e; --skin-btn: #eecda3;
         }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--studio-bg); color: var(--text-main); font-family: sans-serif; overflow: hidden; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--studio-bg); color: #fff; font-family: sans-serif; overflow: hidden; }
 
-        /* GATEWAY SCREEN */
-        .gateway-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--navy-gate); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .gateway-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 40px; }
-        .gateway-btn-group { display: flex; gap: 25px; }
-        .skin-button { background-color: var(--skin-btn); color: #2c1a04; font-size: 1.15rem; font-weight: 700; padding: 15px 38px; border: none; border-radius: 12px; cursor: pointer; }
+        /* GATEWAY */
+        .gateway-screen { position: fixed; width: 100%; height: 100%; background-color: var(--navy-gate); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        .skin-button { background-color: var(--skin-btn); color: #2c1a04; font-weight: 700; padding: 15px 38px; border: none; border-radius: 12px; cursor: pointer; margin: 10px; }
 
-        /* PORTAL LAYOUT */
-        .portal-layout { display: none; height: 100%; width: 100%; display: flex; }
-        .fsc-sidebar { width: 350px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); padding: 20px; overflow-y: auto; }
-        .workspace-stage { flex: 1; padding: 25px; position: relative; }
-        canvas { background-color: #050710; border: 1px solid var(--border-color); border-radius: 10px; width: 100%; height: 100%; }
+        /* PORTAL LAYOUT - WORKSPACE IS NOW MAXIMIZED */
+        .portal-layout { display: none; height: 100vh; width: 100vw; display: flex; }
+        .fsc-sidebar { width: 250px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); padding: 20px; }
+        .workspace-stage { flex: 1; padding: 10px; position: relative; }
         
-        .briefing-popup-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(7, 11, 25, 0.95); z-index: 50; display: none; justify-content: center; align-items: center; }
-        .briefing-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 35px; width: 500px; text-align: center; }
+        canvas { background-color: #050710; border: 1px solid var(--border-color); border-radius: 10px; width: 100%; height: 100%; display: block; }
+        
+        .briefing-popup-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 11, 25, 0.9); z-index: 50; display: none; justify-content: center; align-items: center; }
+        .briefing-card { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 30px; border-radius: 20px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div id="gatewayScreen" class="gateway-screen">
-        <h1 class="gateway-title">FSc Chemistry Learning Portal</h1>
-        <div class="gateway-btn-group">
+        <h1>FSc Chemistry Learning Portal</h1>
+        <div>
             <button class="skin-button" onclick="enterPortal('Part-I')">FSc Part-I</button>
             <button class="skin-button" onclick="enterPortal('Part-II')">FSc Part-II</button>
         </div>
@@ -45,8 +43,8 @@
         <div class="workspace-stage">
             <div id="briefingPopup" class="briefing-popup-overlay">
                 <div class="briefing-card">
-                    <h2>Hydrogenation of Ethene</h2>
-                    <p>CH₂=CH₂ + H₂ → CH₃-CH₃</p>
+                    <h2 id="r-title">Hydrogenation of Ethene</h2>
+                    <p id="r-eq">CH₂=CH₂ + H₂ → CH₃-CH₃</p>
                     <button class="skin-button" onclick="closeBriefing()">Understood, Enter Simulation</button>
                 </div>
             </div>
@@ -62,15 +60,16 @@
         function enterPortal(cohort) {
             document.getElementById('gatewayScreen').style.display = 'none';
             document.getElementById('portalLayout').style.display = 'flex';
-            document.getElementById('cohortTitle').textContent = `FSc ${cohort} Chemistry`;
+            document.getElementById('cohortTitle').textContent = `FSc ${cohort}`;
             document.getElementById('briefingPopup').style.display = 'flex';
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+            // Set canvas size dynamically
+            canvas.width = canvas.parentElement.clientWidth - 20;
+            canvas.height = canvas.parentElement.clientHeight - 20;
         }
 
         function closeBriefing() {
             document.getElementById('briefingPopup').style.display = 'none';
-            document.getElementById('side-info').innerHTML = "<p><strong>Reaction:</strong> Hydrogenation of Ethene<br><strong>Status:</strong> Simulation Active</p>";
+            document.getElementById('side-info').innerHTML = "<p><strong>Active Reaction:</strong> Hydrogenation of Ethene</p>";
             initChamber();
         }
 
